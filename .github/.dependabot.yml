@@ -1,0 +1,46 @@
+---
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 5
+      semver-major-days: 15
+      semver-minor-days: 7
+      semver-patch-days: 3
+    target-branch: main
+    rebase-strategy: auto
+    versioning-strategy: auto
+    labels:
+      - dependencies
+    groups:
+      major:
+        applies-to: version-updates
+        update-types:
+          - "major"
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+      security-updates:
+        patterns:
+          - "*"
+        applies-to: security-updates
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 5
+    groups:
+      actions:
+        patterns:
+          - "*"
+        applies-to: version-updates
+      security-updates:
+        patterns:
+          - "*"
+        applies-to: security-updates
