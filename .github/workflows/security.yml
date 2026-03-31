@@ -15,7 +15,7 @@ jobs:
   Security-Checks:
     name: Python Security Check
     timeout-minutes: 20
-    runs-on: med_runner_150GB
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
