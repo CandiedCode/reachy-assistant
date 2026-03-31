@@ -28,4 +28,4 @@ jobs:
           version: "latest"
 
       - name: Sync dependencies
-        run: uv pip install . --group all
+        run: uv venv && source .venv/bin/activate && uv pip install . --group all
