@@ -1,0 +1,58 @@
+---
+name: Security Check
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: 30 5 * * 1
+
+env:
+  UV_SYSTEM_PYTHON: true
+
+jobs:
+  Security-Checks:
+    name: Python Security Check
+    timeout-minutes: 20
+    runs-on: med_runner_150GB
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.13"]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/cache@v5
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pyproject.toml') }}
+      - name: Install dependencies
+        run: |
+          make install-requirements
+      - name: UV Lock
+        run: |
+          make lock
+      - name: Dependency Vulnerability Scan with OSV Scanner
+        run: |
+          go run github.com/google/osv-scanner/v2/cmd/osv-scanner@latest \
+            scan source \
+            --lockfile=uv.lock \
+            --all-packages \
+            --format=json \
+            --output=osv-results.json
+      - name: Upload OSV Scanner Report
+        if: always()
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: osv-scanner-results
+          path: osv-results.json
+          if-no-files-found: warn
+      - name: Security SAST Scan
+        run: |
+          make security/sast
+      - name: Secret Scan
+        run: |
+          make security/secrets-ci
