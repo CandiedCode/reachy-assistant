@@ -22,6 +22,11 @@ jobs:
         python-version: ["3.13"]
     steps:
       - uses: actions/checkout@v4
+      - name: Install system deps (Linux)
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libcairo2-dev libgirepository1.0-dev
+          version: 1.0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
