@@ -1,9 +1,10 @@
 import threading
+import time
+
+import numpy as np
+from pydantic import BaseModel
 from reachy_mini import ReachyMini, ReachyMiniApp
 from reachy_mini.utils import create_head_pose
-import numpy as np
-import time
-from pydantic import BaseModel
 
 
 class ReachyAssistant(ReachyMiniApp):
