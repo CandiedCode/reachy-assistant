@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "setuptools-scm>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [dependency-groups]
@@ -38,7 +38,7 @@ test = [
 
 [project]
 name = "reachy_assistant"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -59,3 +59,9 @@ where = ["."]
 
 [tool.setuptools.package-data]
 reachy_assistant = ["**/*"] # Also include all non-.py files
+
+[tool.setuptools-scm]
+write-to = "reachy_assistant/_version.py"
+write-to-template = "__version__ = {version!r}"
+version-scheme = "guess-next-dev"
+local-scheme = "no-local-version"
