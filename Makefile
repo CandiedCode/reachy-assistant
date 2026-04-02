@@ -55,6 +55,27 @@ secrets/secrets-ci:
 	    exit 0; \
 	fi
 
+.PHONY: semantic-release/install
+semantic-release/install: ## Install semantic-release dependencies (nvm use + npm install)
+	@echo "Setting up Node.js environment for semantic-release..."
+	@command -v nvm >/dev/null 2>&1 && . ~/.nvm/nvm.sh && nvm use || echo "⚠ nvm not found, skipping nvm use"
+	@echo "Installing dependencies..."
+	@npm install
+	@echo "✓ Setup complete"
+
+.PHONY: semantic-release/dry-run
+semantic-release/dry-run: ## Perform a dry-run of semantic-release (no changes made)
+	@echo "Running semantic-release dry-run..."
+	@npx semantic-release --dry-run --no-ci --branches main
+	@echo "✓ Dry-run complete"
+
+.PHONY: semantic-release/publish
+semantic-release/publish: ## Publish a release using semantic-release
+	@echo "Publishing release..."
+	@npx semantic-release --branches main
+	@echo "✓ Release published"
+
+
 .PHONY: help
 help: ## Shows all targets and help from the Makefile (this message).
 	@grep --no-filename -E '^([a-zA-Z0-9_.%/-]+:.*?)##' $(MAKEFILE_LIST) | sort | \
