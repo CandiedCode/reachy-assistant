@@ -75,6 +75,32 @@ semantic-release/publish: ## Publish a release using semantic-release
 	@npx semantic-release --branches main
 	@echo "✓ Release published"
 
+.PHONY: npm/outdated
+npm/outdated: ## Show outdated npm packages
+	@npm outdated
+
+.PHONY: npm/audit
+npm/audit: ## Check for npm vulnerabilities
+	@npm audit
+
+.PHONY: npm/audit-fix
+npm/audit-fix: ## Automatically fix npm vulnerabilities
+	@echo "Fixing npm vulnerabilities..."
+	@npm audit fix
+	@echo "✓ Vulnerabilities fixed"
+
+.PHONY: npm/update
+npm/update: ## Update npm packages to latest versions within semver constraints
+	@echo "Updating npm packages..."
+	@npm update
+	@echo "✓ Packages updated"
+
+.PHONY: npm/upgrade
+npm/upgrade: ## Upgrade all packages to latest major versions
+	@echo "Upgrading npm packages to latest versions..."
+	@npx npm-check-updates -u
+	@npm install
+	@echo "✓ Packages upgraded"
 
 .PHONY: help
 help: ## Shows all targets and help from the Makefile (this message).

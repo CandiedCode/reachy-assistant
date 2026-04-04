@@ -1,0 +1,52 @@
+---
+name: Dependabot UV Lock Update
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-uv-lock:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]' && contains(github.event.pull_request.title, 'Bump')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Install system dependencies
+        uses: awalsh128/cache-apt-pkgs-action@v1.6.0
+        with:
+          packages: libcairo2-dev libgirepository1.0-dev
+          version: 1.0
+
+      - name: Update uv.lock
+        run: |
+          uv lock
+
+      - name: Commit uv.lock if changed
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: dependabot[bot]
+          author_email: dependabot[bot]@users.noreply.github.com
+          message: "chore: update uv.lock for ${{ github.event.pull_request.title }}"
+          add: "uv.lock"
+          push: true
+          pull_strategy: "NO-PULL"
