@@ -10,10 +10,10 @@ from reachy_mini.utils import create_head_pose
 class ReachyAssistant(ReachyMiniApp):
     # Optional: URL to a custom configuration page for the app
     # eg. "http://localhost:8042"
-    custom_app_url: str | None = "http://0.0.0.0:8042"
+    custom_app_url: str | None = "http://localhost:8047"
     # Optional: specify a media backend ("gstreamer", "gstreamer_no_video", "default", etc.)
     # On the wireless, use gstreamer_no_video to optimise CPU usage if the app does not use video streaming
-    request_media_backend: str | None = None
+    request_media_backend: str | None = "no_media"
 
     def run(self, reachy_mini: ReachyMini, stop_event: threading.Event):
         t0 = time.time()
