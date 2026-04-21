@@ -24,3 +24,10 @@ uv venv
 uv pip install "reachy-mini[mujoco]"
 reachy-mini-app-assistant create
 ```
+
+
+# Fix the gstreamer-python library to use the correct Python framework on macOS:
+install_name_tool -change \
+  /Library/Frameworks/Python.framework/Versions/3.12/Python \
+  /opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/Python \
+  .venv/lib/python3.12/site-packages/gstreamer_python/lib/gstreamer-1.0/libgstpython.dylib

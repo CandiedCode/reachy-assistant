@@ -3,10 +3,14 @@ MAKEFLAGS += --warn-undefined-variables
 .SHELLFLAGS := -eu -o pipefail -c
 .DEFAULT_GOAL := help
 
+.PHONY: reachy/sim
+reachy/sim: ## Run the Reachy simulator
+	@echo "Starting Reachy simulator..."
+	mjpython -m reachy_mini.daemon.app.main --sim
+
 .PHONY: security/dependency
 security/dependency: ## Check if dependencies contain any vulnerabilities
 	go run github.com/google/osv-scanner/v2/cmd/osv-scanner@latest scan source --lockfile=uv.lock --all-packages --format=vertical
-
 
 .PHONY: security/sast
 security/sast: ## Run Static Analysis testing
