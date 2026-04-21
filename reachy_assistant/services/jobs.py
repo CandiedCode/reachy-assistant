@@ -1,0 +1,50 @@
+"""Job orchestrator — discovers and starts all registered cron jobs."""
+
+import threading
+
+from reachy_assistant.models.service_status import ServiceStatus
+from reachy_assistant.services.registry import CronJobEntry, Startable, build_registry
+
+
+class Jobs:
+    """Manages discovery and startup of all registered cron jobs.
+
+    Jobs are registered via the @cron_job decorator and auto-discovered
+    by importing their service modules. The registry is instantiated once
+    per Jobs instance.
+    """
+
+    def __init__(self) -> None:
+        """Initialize and discover all registered jobs."""
+        self._entries: list[CronJobEntry] = build_registry()
+
+    @property
+    def statuses(self) -> list[ServiceStatus]:
+        """Return ServiceStatus objects for all registered jobs."""
+        return [entry.status for entry in self._entries]
+
+    def get_scheduler(self, name: str) -> Startable | None:
+        """Get a specific scheduler by job name.
+
+        Args:
+            name: The job name as passed to @cron_job(name=...).
+
+        Returns:
+            The Startable scheduler instance, or None if not found.
+        """
+        return next((entry.scheduler for entry in self._entries if entry.name == name), None)
+
+    def start(self, stop_event: threading.Event) -> None:
+        """Start all registered jobs.
+
+        Args:
+            stop_event: threading.Event to signal when to stop scheduled jobs.
+        """
+        for entry in self._entries:
+            entry.scheduler.start(stop_event)
+
+    def stop(self) -> None:
+        """Stop all jobs."""
+        for entry in self._entries:
+            if hasattr(entry.scheduler, "stop"):
+                entry.scheduler.stop()

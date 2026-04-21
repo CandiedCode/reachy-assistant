@@ -4,3 +4,6 @@ __pycache__/
 build/
 
 node_modules/
+
+# Runtime data
+data/
