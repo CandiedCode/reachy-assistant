@@ -1,7 +1,6 @@
 """Read/write calendar events to SQLite with Alembic migrations."""
 
 import logging
-from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -68,14 +67,14 @@ class CalendarStore:
 
     def merge_and_save(
         self,
-        new_events: Sequence[CalendarEvent],
+        new_events: set[CalendarEvent],
     ) -> int:
         """Merge new events into the store and save to database.
 
         New events take precedence over existing events with the same id (for corrections).
 
         Args:
-            new_events: List of calendar events to merge in.
+            new_events: Set of calendar events to merge in.
 
         Returns:
             Number of net-new events added (after deduplication).
