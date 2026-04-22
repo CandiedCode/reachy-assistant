@@ -2,8 +2,8 @@
 
 import threading
 
-from reachy_assistant.models.service_status import ServiceStatus
 from reachy_assistant.services.registry import CronJobEntry, Startable, build_registry
+from reachy_assistant.services.service_status import ServiceStatus
 
 
 class Jobs:
