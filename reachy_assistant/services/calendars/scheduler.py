@@ -2,16 +2,14 @@
 
 import logging
 import threading
-from collections.abc import Callable
 from pathlib import Path
 
 import pydantic
 import pydantic_settings
 
-from reachy_assistant.models.service_status import ServiceStatus
-from reachy_assistant.services.calendars.gatech import scraper
+from reachy_assistant.services.calendars.scraper import Scraper
 from reachy_assistant.services.calendars.store import CalendarStore
-from reachy_assistant.services.registry import CronJobEntry, cron_job
+from reachy_assistant.services.service_status import ServiceStatus
 
 logger = logging.getLogger(__name__)
 
@@ -28,24 +26,21 @@ class CalendarScheduler:
     def __init__(
         self,
         store: CalendarStore,
-        scraper_fn: Callable[[list[str] | None], list],
+        scraper: Scraper,
         interval_seconds: int = ONE_WEEK_SECONDS,
-        excluded_categories: list[str] | None = None,
         status: ServiceStatus | None = None,
     ) -> None:
         """Initialize the scheduler.
 
         Args:
             store: CalendarStore instance for persisting events.
-            scraper_fn: Function to call to scrape calendar. Should accept excluded_categories.
+            scraper: Scraper instance to use for scraping the calendar.
             interval_seconds: How often to run the scraper (default: 1 week).
-            excluded_categories: List of categories to exclude from results.
             status: Optional ServiceStatus for health tracking.
         """
         self._store = store
-        self._scraper_fn = scraper_fn
+        self._scraper = scraper
         self._interval = interval_seconds
-        self._excluded_categories = excluded_categories
         self._status = status
         self._timer: threading.Timer | None = None
 
@@ -97,8 +92,8 @@ class CalendarScheduler:
         if self._status:
             self._status.mark_started()
         try:
-            events = self._scraper_fn(self._excluded_categories)
-            added = self._store.merge_and_save(events, self._excluded_categories)
+            events = self._scraper.scrape_calendar()
+            added = self._store.merge_and_save(events)
             if self._status:
                 self._status.mark_success()
             logger.info(
@@ -125,26 +120,3 @@ class CalendarSchedulerConfig(pydantic.BaseModel):
     """Interval in seconds between calendar scraper runs."""
     calendar_excluded_categories: list[str] = ["Readmission", "Thesis", "Faculty"]
     """List of event categories to exclude from results."""
-
-
-@cron_job(name="gatech_calendar")
-def _register() -> CronJobEntry | None:
-    """Register the GaTech calendar scraper job.
-
-    Returns None if calendar_enabled is False, otherwise returns a
-    CronJobEntry with the configured scheduler and status.
-    """
-    settings = CalendarSchedulerConfig()
-    if not settings.calendar_enabled:
-        return None
-
-    status = ServiceStatus(name="calendar_scheduler", enabled=True)
-    store = CalendarStore(settings.calendar_db_path)
-    scheduler = CalendarScheduler(
-        store=store,
-        scraper_fn=scraper.scrape_calendar,
-        interval_seconds=settings.calendar_interval_seconds,
-        excluded_categories=settings.calendar_excluded_categories,
-        status=status,
-    )
-    return CronJobEntry(name="gatech_calendar", scheduler=scheduler, status=status, config=settings)

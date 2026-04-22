@@ -33,7 +33,7 @@ test = [
     "pytest-cov==7.0.0",
     "pytest-subtests==0.15.0",
     "pytest-xdist==3.8.0",
-    "pytest==9.0.2",
+    "pytest==9.0.3",
 ]
 
 [project]
@@ -46,6 +46,7 @@ dependencies = [
     "alembic==1.13",
     "beautifulsoup4==4.14.3",
     "opencv-python==4.13.0.92",
+    "playwright==1.58.0",
     "pydantic_settings==2.13.1",
     "reachy-mini[mujoco]==1.6.0",
     "requests==2.33.1",

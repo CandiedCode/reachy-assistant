@@ -14,7 +14,7 @@ class CalendarEvent(event.CalendarEvent):
 
     _DAY_OF_WEEK = re.compile(r"\s*\([A-Za-z]+\)")
 
-    def _parse_date(self, raw_date: str, year: int) -> datetime.date:
+    def _parse_date(self, raw_date: str, year: int) -> datetime.datetime:
         """Parse a date string with day-of-week suffix.
 
         Args:
@@ -22,16 +22,16 @@ class CalendarEvent(event.CalendarEvent):
             year: academic year (e.g., 2026)
 
         Returns:
-            date object
+            datetime object
 
         Raises:
             ValueError: if parsing fails
         """
         clean_date = self._DAY_OF_WEEK.sub("", raw_date).strip()
         dt = datetime.datetime.strptime(f"{clean_date} {year}", "%B %d %Y").replace(tzinfo=datetime.UTC)
-        return dt.date()
+        return dt
 
-    def parse_event_dates(self) -> tuple[datetime.date, datetime.date]:
+    def parse_event_dates(self) -> tuple[datetime.datetime, datetime.datetime]:
         """Parse an event's date range.
 
         Returns:
@@ -47,5 +47,5 @@ class CalendarEvent(event.CalendarEvent):
 
     @pydantic.model_validator(mode="after")
     def _parse_dates(self) -> Self:
-        self._parsed_dates = self.parse_event_dates()
+        self.parsed_dates = self.parse_event_dates()
         return self

@@ -20,8 +20,26 @@ class CalendarEvent(pydantic.BaseModel):
     """Event category (e.g., "Classes", "Holiday", "Registration")."""
     event: str
     """Event description (HTML-stripped text)."""
-    weight: int
-    """Ordering weight from the page (for sorting within a year)."""
+    link: str | None
+    """URL link to the event page."""
+    parsed_dates: tuple[datetime.datetime, datetime.datetime | None] | None = None
+    """Parsed start/end dates for the event, populated after validation."""
     _scraped_at: datetime.datetime = datetime.datetime.now(datetime.UTC)
     """ISO 8601 UTC timestamp when this event was scraped."""
-    _parsed_dates: tuple[datetime.date, datetime.date | None] | None = None
+
+    def __hash__(self) -> int:
+        """Hash based on the unique event ID for deduplication."""
+        return hash(self.id)
+
+    def __eq__(self, other: object) -> bool:
+        """Equality based on the unique event ID.
+
+        Args:
+            other: Another object to compare against.
+
+        Returns:
+            True if the other object is a CalendarEvent with the same ID, False otherwise.
+        """
+        if not isinstance(other, CalendarEvent):
+            return False
+        return self.id == other.id
