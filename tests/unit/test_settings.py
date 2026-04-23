@@ -2,6 +2,7 @@
 
 import pytest
 from pydantic import ValidationError
+
 from reachy_assistant.settings import Settings
 
 DEFAULTS = {
@@ -24,7 +25,7 @@ class TestSettingsDefaults:
             ("request_media_backend", "auto"),
         ],
     )
-    def test_defaults(self, attribute: str, expected_value) -> None:
+    def test_defaults(self, attribute: str, expected_value: str | int) -> None:
         """Test default values for all settings attributes."""
         settings = Settings()
         assert getattr(settings, attribute) == expected_value
@@ -48,7 +49,7 @@ class TestSettingsEnvironmentVariables:
         env_var: str,
         env_value: str,
         attribute: str,
-        expected_value,
+        expected_value: str | int,
     ) -> None:
         """Test loading settings from environment variables with RA_ prefix."""
         monkeypatch.setenv(env_var, env_value)
@@ -69,7 +70,7 @@ class TestSettingsValidation:
     def test_valid_media_backends(
         self,
         monkeypatch: pytest.MonkeyPatch,
-        backend,
+        backend: str | None,
     ) -> None:
         """Test that valid media backends are accepted."""
         if backend is None:

@@ -35,9 +35,8 @@ class MockScheduler:
         """Simulate stopping the scheduler."""
         self.stop_called = True
 
-def create_test_job(
-    job_name: str, enabled: bool = True
-) -> tuple[MockScheduler, "ServiceStatus", CronJobEntry]:
+
+def create_test_job(job_name: str, enabled: bool = True) -> tuple[MockScheduler, "ServiceStatus", CronJobEntry]:
     """Create a test job with MockScheduler, ServiceStatus, and CronJobEntry.
 
     Args:
@@ -88,7 +87,6 @@ class TestJobsInitialization:
         jobs = Jobs()
 
         assert [entry.name for entry in jobs.entries] == ["job1", "job2"]
-
 
     def test_jobs_empty_when_no_enabled_jobs(self, mock_build_registry: BuildRegistry) -> None:
         """Jobs has no entries when all jobs are disabled."""

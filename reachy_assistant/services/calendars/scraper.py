@@ -1,4 +1,5 @@
 """Scraper abstract module for calendars."""
+
 import abc
 
 from reachy_assistant.services.calendars.event import CalendarEvent

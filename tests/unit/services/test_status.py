@@ -3,6 +3,8 @@
 import threading
 from datetime import UTC, datetime
 
+import pytest
+
 from reachy_assistant.services.status import ServiceStatus
 
 
@@ -71,42 +73,51 @@ class TestServiceStatusTransitions:
 class TestServiceStatusAsDict:
     """Test as_dict() snapshot method."""
 
-    def test_as_dict_empty(self) -> None:
-        """as_dict returns all fields."""
-        status = ServiceStatus(name="test", enabled=True)
+    @pytest.mark.parametrize(
+        "status,expected_dict",
+        [
+            pytest.param(
+                ServiceStatus(name="test", enabled=True),
+                {
+                    "name": "test",
+                    "enabled": True,
+                    "running": False,
+                    "last_run_at": None,
+                    "last_success_at": None,
+                    "last_error": None,
+                    "next_run_at": None,
+                },
+                id="empty_status",
+            ),
+            pytest.param(
+                ServiceStatus(
+                    name="calendar",
+                    enabled=True,
+                    running=False,
+                    last_run_at="2026-04-10T12:00:00+00:00",
+                    last_success_at="2026-04-10T12:00:05+00:00",
+                    last_error=None,
+                    next_run_at="2026-04-17T12:00:00+00:00",
+                ),
+                {
+                    "name": "calendar",
+                    "enabled": True,
+                    "running": False,
+                    "last_run_at": "2026-04-10T12:00:00+00:00",
+                    "last_success_at": "2026-04-10T12:00:05+00:00",
+                    "last_error": None,
+                    "next_run_at": "2026-04-17T12:00:00+00:00",
+                },
+                id="populated_status",
+            ),
+        ],
+    )
+    def test_as_dict(
+        self, status: ServiceStatus, expected_dict: dict
+    ) -> None:
+        """as_dict returns all fields matching expected values."""
         result = status.as_dict()
-        assert result["name"] == "test"
-        assert result["enabled"]
-        assert not result["running"]
-        assert result["last_run_at"] is None
-        assert result["last_success_at"] is None
-        assert result["last_error"] is None
-        assert result["next_run_at"] is None
-
-    def test_as_dict_populated(self) -> None:
-        """as_dict with all fields populated."""
-        status = ServiceStatus(
-            name="calendar",
-            enabled=True,
-            running=False,
-            last_run_at="2026-04-10T12:00:00+00:00",
-            last_success_at="2026-04-10T12:00:05+00:00",
-            last_error=None,
-            next_run_at="2026-04-17T12:00:00+00:00",
-        )
-        result = status.as_dict()
-        # as_dict should return only public fields (not _lock)
-        assert result == {
-            "name": "calendar",
-            "enabled": True,
-            "running": False,
-            "last_run_at": "2026-04-10T12:00:00+00:00",
-            "last_success_at": "2026-04-10T12:00:05+00:00",
-            "last_error": None,
-            "next_run_at": "2026-04-17T12:00:00+00:00",
-        }
-        assert "_lock" not in result
-
+        assert result == expected_dict
 
 class TestServiceStatusThreadSafety:
     """Test thread-safe concurrent access."""

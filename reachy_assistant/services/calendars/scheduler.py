@@ -9,7 +9,7 @@ import pydantic_settings
 
 from reachy_assistant.services.calendars.scraper import Scraper
 from reachy_assistant.services.calendars.store import CalendarStore
-from reachy_assistant.services.service_status import ServiceStatus
+from reachy_assistant.services.status import ServiceStatus
 
 logger = logging.getLogger(__name__)
 
