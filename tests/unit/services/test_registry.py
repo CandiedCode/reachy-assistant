@@ -149,7 +149,6 @@ class TestBuildRegistry:
             status = ServiceStatus(name="conditional", enabled=True)
             return CronJobEntry(name="conditional", scheduler=scheduler, status=status)
 
-        # Factory can choose to return None (disabled) or a CronJobEntry (enabled)
         entries = build_registry()
         assert len(entries) == 1
 
@@ -167,6 +166,7 @@ class TestStartableProtocol:
 
         class PartialScheduler:
             """Mocks a scheduler that only has start() but not stop()."""
+
             def start(self, stop_event: threading.Event) -> None:
                 """Simulate starting the scheduler."""
 

@@ -7,6 +7,7 @@
     "cSpell.words": [
         "delenv",
         "reachy",
-        "Startable"
+        "Startable",
+        "usefixtures"
     ]
 }
