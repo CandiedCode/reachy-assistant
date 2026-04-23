@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/CandiedCode/reachy-assistant/compare/v1.1.0...v1.2.0) (2026-04-23)
+
+
+### Features
+
+* add alembic migration support for sqllite ([e10014a](https://github.com/CandiedCode/reachy-assistant/commit/e10014a4e7213ee1be264f08de96dcd9a6543e95))
+
 # [1.1.0](https://github.com/CandiedCode/reachy-assistant/compare/v1.0.0...v1.1.0) (2026-04-22)
 
 
