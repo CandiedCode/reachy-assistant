@@ -106,6 +106,14 @@ npm/upgrade: ## Upgrade all packages to latest major versions
 	@npm install
 	@echo "✓ Packages upgraded"
 
+.PHONY: python/ruff-format
+python/ruff-format: ## Automatically format Python code with ruff
+	@ruff format
+
+.PHONY: python/ruff-fix
+python/ruff-fix: ## Automatically fix Python code with ruff
+	@ruff check --fix
+
 .PHONY: python/lock
 python/lock: ## Lock Python dependencies
 	@echo "Locking Python dependencies..."
@@ -137,6 +145,28 @@ python/unit-tests: ## Run Python unit tests with coverage
 python/lint-check: ## Run Python linters (flake8 and black)
 	ruff check
 	ruff format --check
+
+.PHONY: pre-commit/install
+pre-commit/install: ## Install pre-commit hooks
+	@echo "Installing pre-commit hooks..."
+	@pre-commit install
+	@echo "✓ Pre-commit hooks installed"
+
+.PHONY: pre-commit/autoupdate
+pre-commit/autoupdate: ## Update pre-commit hook versions
+	@pre-commit autoupdate
+
+.PHONY: pre-commit/gc
+pre-commit/gc: ## Clean unused cached repos.
+	@pre-commit gc
+
+.PHONY: pre-commit/remove-cache
+pre-commit/remove-cache: ## Remove all of pre-commit's cache
+	rm -rf ~/.cache/pre-commit/
+
+.PHONY: pre-commit/run
+pre-commit/run: ## Manually run pre-commit
+	@pre-commit run --verbose
 
 .PHONY: help
 help: ## Shows all targets and help from the Makefile (this message).
