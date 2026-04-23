@@ -28,7 +28,7 @@ from typing import Protocol, runtime_checkable
 
 import pydantic
 
-from reachy_assistant.services.service_status import ServiceStatus
+from reachy_assistant.services.status import ServiceStatus
 
 LOGGER = logging.getLogger(__name__)
 

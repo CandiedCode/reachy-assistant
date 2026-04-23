@@ -33,7 +33,10 @@ jobs:
           enable-cache: true
       - name: Check uv.lock is up to date
         run: |
-          uv lock --check
+          make python/lock-check
       - name: Install dependencies
         run: |
-          uv pip install . --group all
+          make python/install
+      - name: Run tests
+        run: |
+          make python/unit-tests

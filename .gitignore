@@ -7,3 +7,10 @@ node_modules/
 
 # Runtime data
 data/
+
+# Coverage Reports
+.coverage
+.coverage.*
+
+# Security Reports
+osv-results.json

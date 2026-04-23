@@ -10,7 +10,7 @@ from sqlalchemy import create_engine, text
 from alembic import command
 from reachy_assistant.services.calendars.event import CalendarEvent
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class CalendarStore:
@@ -34,15 +34,15 @@ class CalendarStore:
             # Find alembic.ini in project root
             alembic_ini = Path(__file__).parent.parent.parent.parent / "alembic.ini"
             if not alembic_ini.exists():
-                logger.warning("alembic.ini not found, skipping migrations")
+                LOGGER.warning("alembic.ini not found, skipping migrations")
                 return
 
             cfg = Config(str(alembic_ini))
             cfg.set_main_option("sqlalchemy.url", str(self._engine.url))
             command.upgrade(cfg, "head")
-            logger.info("Alembic migrations completed successfully")
-        except Exception as e:
-            logger.error("Failed to run Alembic migrations: %s", e, exc_info=True)
+            LOGGER.info("Alembic migrations completed successfully")
+        except Exception:  # pylint: disable=broad-exception-caught
+            LOGGER.exception("Failed to run Alembic migrations")
             raise
 
     def load(self) -> dict[str, CalendarEvent]:
@@ -55,14 +55,14 @@ class CalendarStore:
             with self._engine.connect() as conn:
                 query = text(
                     """
-                    SELECT id, date, semester, year, category, event, weight
+                    SELECT id, date, semester, year, category, event, start_date, end_date, link
                     FROM calendar_events
                     """
                 )
                 rows = conn.execute(query).mappings().all()
             return {row["id"]: CalendarEvent.model_validate(dict(row)) for row in rows}
-        except Exception as e:  # noqa: BLE001
-            logger.warning("Calendar store load failed: %s", e, exc_info=True)
+        except Exception as e:  # noqa: BLE001 pylint: disable=broad-exception-caught
+            LOGGER.warning("Calendar store load failed: %s", e, exc_info=True)
             return {}
 
     def merge_and_save(
@@ -75,6 +75,7 @@ class CalendarStore:
 
         Args:
             new_events: Set of calendar events to merge in.
+            excluded_categories: Optional list of categories to exclude (currently unused).
 
         Returns:
             Number of net-new events added (after deduplication).
@@ -87,8 +88,8 @@ class CalendarStore:
                     text(
                         """
                         INSERT OR REPLACE INTO calendar_events
-                            (id, date, semester, year, category, event, weight, scraped_at)
-                        VALUES (:id, :date, :semester, :year, :category, :event, :weight, :scraped_at)
+                            (id, date, semester, year, category, event, start_date, end_date, link, scraped_at)
+                        VALUES (:id, :date, :semester, :year, :category, :event, :start_date, :end_date, :link, :scraped_at)
                         """
                     ),
                     {
@@ -100,7 +101,7 @@ class CalendarStore:
         after = self._count()
         added = after - before
 
-        logger.info(
+        LOGGER.info(
             "Calendar store saved: %d total events (added %d new)",
             after,
             added,
@@ -114,5 +115,5 @@ class CalendarStore:
             with self._engine.connect() as conn:
                 result = conn.execute(text("SELECT COUNT(*) FROM calendar_events"))
                 return result.scalar() or 0
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001 pylint: disable=broad-exception-caught
             return 0

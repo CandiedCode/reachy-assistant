@@ -22,8 +22,10 @@ class CalendarEvent(pydantic.BaseModel):
     """Event description (HTML-stripped text)."""
     link: str | None
     """URL link to the event page."""
-    parsed_dates: tuple[datetime.datetime, datetime.datetime | None] | None = None
-    """Parsed start/end dates for the event, populated after validation."""
+    start_date: datetime.datetime | None = None
+    """Parsed start date (UTC)."""
+    end_date: datetime.datetime | None = None
+    """Parsed end date (UTC). For single-day events, this will be the same as start_date."""
     _scraped_at: datetime.datetime = datetime.datetime.now(datetime.UTC)
     """ISO 8601 UTC timestamp when this event was scraped."""
 

@@ -18,6 +18,8 @@ exclude = [
     "dist",
     "*.egg-info",
     "venv",
+    "reachy_assistant/services/calendars/hive/scraper.py",
+    "reachy_assistant/test.py",
 ]
 
 [format]
@@ -111,6 +113,9 @@ known-first-party = [
 known-third-party = []
 split-on-trailing-comma = false
 
+[lint.mccabe]
+max-complexity = 12
+
 [lint.pep8-naming]
 ignore-names = [
     "setUp",
@@ -126,8 +131,12 @@ ignore-names = [
 ]
 
 "tests/*.py" = [
+    "BLE001",  # Blind except: `except:` or `except Exception:` used
+    "D100",  # Missing docstring in public module
     "D101",  # Missing docstring in public class
+    "D104",  # Missing docstring in public package
     "D106",  # Missing docstring in public nested class
+    "PLR2004", # Magic value used in comparison
 ]
 
 [lint.pydocstyle]

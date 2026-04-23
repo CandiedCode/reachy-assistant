@@ -106,6 +106,38 @@ npm/upgrade: ## Upgrade all packages to latest major versions
 	@npm install
 	@echo "✓ Packages upgraded"
 
+.PHONY: python/lock
+python/lock: ## Lock Python dependencies
+	@echo "Locking Python dependencies..."
+	@uv lock
+	@echo "✓ Dependencies locked"
+
+.PHONY: python/lock-check
+python/lock-check: ## Check if Python dependencies are up to date with lockfile
+	@echo "Checking if Python dependencies are up to date with lockfile..."
+	@uv lock --check
+
+.PHONY: python/outdated
+python/outdated: ## Show outdated Python packages
+	@uv pip list --outdated
+
+.PHONY: python/install
+python/install: ## Install Python dependencies
+	@echo "Installing Python dependencies..."
+	@uv pip install . --group all
+	@echo "✓ Dependencies installed"
+
+.PHONY: python/unit-tests
+python/unit-tests: ## Run Python unit tests with coverage
+	@echo "Running Python unit tests with coverage..."
+	@python -m pytest -v --cov=reachy_assistant tests/unit
+	@echo "✓ Unit tests completed"
+
+.PHONY: python/lint-check
+python/lint-check: ## Run Python linters (flake8 and black)
+	ruff check
+	ruff format --check
+
 .PHONY: help
 help: ## Shows all targets and help from the Makefile (this message).
 	@grep --no-filename -E '^([a-zA-Z0-9_.%/-]+:.*?)##' $(MAKEFILE_LIST) | sort | \
