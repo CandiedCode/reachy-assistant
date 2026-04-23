@@ -112,12 +112,11 @@ class TestServiceStatusAsDict:
             ),
         ],
     )
-    def test_as_dict(
-        self, status: ServiceStatus, expected_dict: dict
-    ) -> None:
+    def test_as_dict(self, status: ServiceStatus, expected_dict: dict) -> None:
         """as_dict returns all fields matching expected values."""
         result = status.as_dict()
         assert result == expected_dict
+
 
 class TestServiceStatusThreadSafety:
     """Test thread-safe concurrent access."""

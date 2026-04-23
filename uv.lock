@@ -5076,7 +5076,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = "==2.13.1" },
     { name = "reachy-mini", extras = ["mujoco"], specifier = "==1.6.0" },
     { name = "requests", specifier = "==2.33.1" },
-    { name = "sqlalchemy", specifier = ">=2.0.45" },
+    { name = "sqlalchemy", specifier = "==2.0.49" },
     { name = "ultralytics", specifier = "==8.0" },
 ]
 
