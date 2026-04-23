@@ -47,5 +47,5 @@ class CalendarEvent(event.CalendarEvent):
 
     @pydantic.model_validator(mode="after")
     def _parse_dates(self) -> Self:
-        self.parsed_dates = self.parse_event_dates()
+        self.start_date, self.end_date = self.parse_event_dates()
         return self

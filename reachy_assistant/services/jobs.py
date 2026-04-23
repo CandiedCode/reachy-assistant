@@ -3,7 +3,7 @@
 import threading
 
 from reachy_assistant.services.registry import CronJobEntry, Startable, build_registry
-from reachy_assistant.services.service_status import ServiceStatus
+from reachy_assistant.services.status import ServiceStatus
 
 
 class Jobs:
@@ -17,6 +17,11 @@ class Jobs:
     def __init__(self) -> None:
         """Initialize and discover all registered jobs."""
         self._entries: list[CronJobEntry] = build_registry()
+
+    @property
+    def entries(self) -> list[CronJobEntry]:
+        """Return the list of registered CronJobEntry objects."""
+        return self._entries
 
     @property
     def statuses(self) -> list[ServiceStatus]:

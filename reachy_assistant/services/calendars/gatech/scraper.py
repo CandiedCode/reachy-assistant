@@ -11,7 +11,7 @@ from reachy_assistant.services.calendars.gatech.event import CalendarEvent
 from reachy_assistant.services.calendars.scheduler import CalendarScheduler, CalendarSchedulerConfig
 from reachy_assistant.services.calendars.store import CalendarStore
 from reachy_assistant.services.registry import CronJobEntry, cron_job
-from reachy_assistant.services.service_status import ServiceStatus
+from reachy_assistant.services.status import ServiceStatus
 
 LOGGER = logging.getLogger(__name__)
 MAIN_URL: Final[str] = "https://registrar.gatech.edu/future-academic-calendar"

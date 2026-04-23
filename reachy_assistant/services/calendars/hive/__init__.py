@@ -1,1 +1,1 @@
-"""GaTech academic calendar scraper and scheduler."""
+"""Hive academic calendar scraper and scheduler."""

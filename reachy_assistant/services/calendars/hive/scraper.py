@@ -13,6 +13,7 @@ from __future__ import annotations
 import datetime
 import json
 import re
+from pathlib import Path
 
 from playwright.sync_api import Page, sync_playwright
 
@@ -223,10 +224,11 @@ class Scraper(scraper.Scraper):
                                 category="Hive",
                                 event=title,
                                 link=None,
-                                parsed_dates=None,
+                                start_date=None,
+                                end_date=None,
                             )
                         )
-                    except Exception as e:  # noqa: BLE001, S112
+                    except Exception as e:  # noqa: BLE001
                         print(f"      Error processing element: {e}")
                         continue
             except Exception:  # noqa: BLE001, S112
@@ -290,7 +292,7 @@ class Scraper(scraper.Scraper):
 
                 next_month_events = self.scrape_visible_month(page)
                 print(f"Found {len(next_month_events)} events in next month")
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 print(f"Error during scraping: {e}")
                 current_month_events = set()
                 current_month_label = "Unknown"
@@ -306,7 +308,7 @@ class Scraper(scraper.Scraper):
                 "events": [e.model_dump(mode="json") for e in current_month_events.union(next_month_events)],
             }
 
-            with open("hive_events.json", "w", encoding="utf-8") as f:
+            with Path("hive_events.json").open("w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
 
             return current_month_events

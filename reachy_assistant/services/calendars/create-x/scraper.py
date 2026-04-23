@@ -11,7 +11,7 @@ from reachy_assistant.services.calendars.event import CalendarEvent
 from reachy_assistant.services.calendars.scheduler import CalendarScheduler, CalendarSchedulerConfig
 from reachy_assistant.services.calendars.store import CalendarStore
 from reachy_assistant.services.registry import CronJobEntry, cron_job
-from reachy_assistant.services.service_status import ServiceStatus
+from reachy_assistant.services.status import ServiceStatus
 
 LOGGER: logging.Logger = logging.getLogger(__name__)
 URL: Final[str] = "https://create-x.gatech.edu/news-events-publications/upcoming-events"
@@ -89,10 +89,11 @@ class Scraper(scraper.Scraper):
                     date=f"{month} {day}, {year}",
                     semester="",
                     year=int(year),
-                    category="Creative-X",
+                    category="Create-X",
                     event=title,
                     link=urljoin("https://create-x.gatech.edu", link.get("href")) if link else None,  # pyright: ignore[reportArgumentType]
-                    parsed_dates=(dt_eastern, dt_eastern),
+                    start_date=dt_eastern,
+                    end_date=dt_eastern,
                 )
             )
 
