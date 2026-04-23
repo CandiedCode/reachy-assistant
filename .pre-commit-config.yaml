@@ -1,0 +1,64 @@
+---
+exclude: .git|.tox
+default_stages:
+  - pre-commit
+default_install_hook_types:
+  - commit-msg
+  - pre-push
+  - pre-commit
+fail_fast: true
+
+repos:
+  # Check that the commit message adheres to the Angular convention (this is needed so that Semantic Release works)
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.13.9
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+      - id: commitizen-branch
+        stages: [pre-push]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: CHANGELOG.md
+      - id: check-toml
+      - id: check-merge-conflict
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        args: [--strict]
+        types_or: [yaml]
+  - repo: local
+    hooks:
+      - id: ruff-fix
+        name: ruff check, with (safe) linting fixes
+        entry: make python/ruff-fix
+        language: system
+        types_or: [python, jupyter]
+        pass_filenames: false
+      - id: ruff-format
+        name: ruff format
+        entry: make python/ruff-format
+        language: system
+        types_or: [python, jupyter]
+        pass_filenames: false
+      - id: pyright
+        name: pyright
+        entry: pyright
+        language: system
+        pass_filenames: true
+        types: [python]
+      - id: unit-tests
+        name: Check pytest unit tests pass
+        entry: make python/unit-tests
+        pass_filenames: false
+        language: system
+        types: [python]
+        stages: [pre-push]
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        name: detect-secrets
