@@ -1,7 +1,3 @@
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
-[![Build](https://github.com/CandiedCode/reachy-assistant/actions/workflows/build.yml/badge.svg)](https://github.com/CandiedCode/reachy-assistant/actions/workflows/build.yml)
-[![Security Check](https://github.com/CandiedCode/reachy-assistant/actions/workflows/security.yml/badge.svg)](https://github.com/CandiedCode/reachy-assistant/actions/workflows/security.yml)
-[![Release](https://github.com/CandiedCode/reachy-assistant/actions/workflows/release.yml/badge.svg)](https://github.com/CandiedCode/reachy-assistant/actions/workflows/release.yml)
 ---
 title: Reachy Assistant
 emoji: 👋
@@ -14,6 +10,11 @@ tags:
  - reachy_mini
  - reachy_mini_python_app
 ---
+
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+[![Build](https://github.com/CandiedCode/reachy-assistant/actions/workflows/build.yml/badge.svg)](https://github.com/CandiedCode/reachy-assistant/actions/workflows/build.yml)
+[![Security Check](https://github.com/CandiedCode/reachy-assistant/actions/workflows/security.yml/badge.svg)](https://github.com/CandiedCode/reachy-assistant/actions/workflows/security.yml)
+[![Release](https://github.com/CandiedCode/reachy-assistant/actions/workflows/release.yml/badge.svg)](https://github.com/CandiedCode/reachy-assistant/actions/workflows/release.yml)
 
 # Reach Assistant
 
