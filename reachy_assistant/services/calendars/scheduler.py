@@ -1,7 +1,6 @@
 """Background scheduler for the GaTech calendar scraper."""
 
 import logging
-import threading
 from pathlib import Path
 
 import pydantic
@@ -9,6 +8,7 @@ import pydantic_settings
 
 from reachy_assistant.services.calendars.scraper import Scraper
 from reachy_assistant.services.calendars.store import CalendarStore
+from reachy_assistant.services.scheduler import BaseScheduler
 from reachy_assistant.services.status import ServiceStatus
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 ONE_WEEK_SECONDS = 7 * 24 * 60 * 60
 
 
-class CalendarScheduler:
+class CalendarScheduler(BaseScheduler):
     """Runs the GaTech calendar scraper on a recurring schedule.
 
     The scraper runs immediately on start, then repeats at the specified interval.
@@ -27,83 +27,40 @@ class CalendarScheduler:
         self,
         store: CalendarStore,
         scraper: Scraper,
-        interval_seconds: int = ONE_WEEK_SECONDS,
-        status: ServiceStatus | None = None,
+        interval_seconds: int,
+        status: ServiceStatus,
     ) -> None:
         """Initialize the scheduler.
 
         Args:
             store: CalendarStore instance for persisting events.
             scraper: Scraper instance to use for scraping the calendar.
-            interval_seconds: How often to run the scraper (default: 1 week).
-            status: Optional ServiceStatus for health tracking.
+            interval_seconds: How often to run the scraper.
+            status: ServiceStatus for health tracking.
         """
+        super().__init__(interval_seconds, status)
         self._store = store
         self._scraper = scraper
-        self._interval = interval_seconds
-        self._status = status
-        self._timer: threading.Timer | None = None
 
     @property
     def store(self) -> CalendarStore:
         """Return the store instance for direct access."""
         return self._store
 
-    def start(self, stop_event: threading.Event) -> None:
-        """Start the scheduler.
-
-        Runs the scraper immediately, then schedules recurring runs.
-
-        Args:
-            stop_event: threading.Event that signals when to stop scheduling.
-        """
-        logger.info("CalendarScheduler starting (interval=%ds)", self._interval)
-        self._schedule_next(stop_event)
-
-    def stop(self) -> None:
-        """Stop the scheduler and cancel any pending timer."""
-        if self._timer is not None:
-            self._timer.cancel()
-            self._timer = None
-        logger.info("CalendarScheduler stopped")
-
-    def _schedule_next(self, stop_event: threading.Event) -> None:
-        """Run the job and schedule the next run.
-
-        Args:
-            stop_event: Stop signal from the main app.
-        """
-        if stop_event.is_set():
-            return
-
-        # Run the scraper in this thread (the timer thread)
-        self._run_job()
-
-        # Schedule the next run
-        if not stop_event.is_set():
-            if self._status:
-                self._status.set_next_run_in_seconds(self._interval)
-            self._timer = threading.Timer(self._interval, self._schedule_next, args=(stop_event,))
-            self._timer.daemon = True
-            self._timer.start()
-
     def _run_job(self) -> None:
         """Execute one scrape cycle."""
-        if self._status:
-            self._status.mark_started()
+        self._status.mark_started()
         try:
             events = self._scraper.scrape_calendar()
             added = self._store.merge_and_save(events)
-            if self._status:
-                self._status.mark_success()
+            self._status.mark_success()
             logger.info(
                 "Calendar sync complete: %d new events, %d total scraped",
                 added,
                 len(events),
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
-            if self._status:
-                self._status.mark_error(str(e))
+            self._status.mark_error(str(e))
             logger.exception("Calendar scrape failed")
 
 
