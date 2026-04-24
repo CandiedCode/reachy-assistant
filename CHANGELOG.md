@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/CandiedCode/reachy-assistant/compare/v1.2.0...v1.3.0) (2026-04-24)
+
+
+### Features
+
+* add support for getting latest 20 papers from arxiv ([fdaad69](https://github.com/CandiedCode/reachy-assistant/commit/fdaad698de35c64eb187ae262dac49a50fa51822))
+
 # [1.2.0](https://github.com/CandiedCode/reachy-assistant/compare/v1.1.0...v1.2.0) (2026-04-23)
 
 
