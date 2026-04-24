@@ -5,6 +5,10 @@ build/
 
 node_modules/
 
+# Environment variables
+.env
+.envrc
+
 # Runtime data
 data/
 
