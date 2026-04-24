@@ -4778,6 +4778,18 @@ wheels = [
 ]
 
 [[package]]
+name = "pytest-github-actions-annotate-failures"
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c2/e1/8f2c242e6d75a26a8e5ddcc23f652a411e4aac3eedc4b923808ac0582685/pytest_github_actions_annotate_failures-0.4.0.tar.gz", hash = "sha256:77d6baa29c8c61c2dacc494fa76eb95a185f0ee61666714ac43fb12ea672d217", size = 10857, upload-time = "2026-03-02T18:57:40.919Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0f/bd/11809f5c78d5d8da2d0e004845d2382768bc20798b3e0988bca61efd349f/pytest_github_actions_annotate_failures-0.4.0-py3-none-any.whl", hash = "sha256:285fed86e16b0b7a8eac6acdcde31913798fb739b15ef5b86895b4f5e32bf237", size = 6039, upload-time = "2026-03-02T18:57:39.991Z" },
+]
+
+[[package]]
 name = "pytest-subtests"
 version = "0.15.0"
 source = { registry = "https://pypi.org/simple" }
@@ -5031,6 +5043,7 @@ all = [
     { name = "pyright" },
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "pytest-github-actions-annotate-failures" },
     { name = "pytest-subtests" },
     { name = "pytest-xdist" },
     { name = "ruff" },
@@ -5063,6 +5076,7 @@ test = [
     { name = "nbmake" },
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "pytest-github-actions-annotate-failures" },
     { name = "pytest-subtests" },
     { name = "pytest-xdist" },
 ]
@@ -5096,6 +5110,7 @@ all = [
     { name = "pyright", specifier = "==1.1.408" },
     { name = "pytest", specifier = "==9.0.3" },
     { name = "pytest-cov", specifier = "==7.0.0" },
+    { name = "pytest-github-actions-annotate-failures", specifier = "==0.4.0" },
     { name = "pytest-subtests", specifier = "==0.15.0" },
     { name = "pytest-xdist", specifier = "==3.8.0" },
     { name = "ruff", specifier = "==0.15.2" },
@@ -5128,6 +5143,7 @@ test = [
     { name = "nbmake", specifier = "==1.5.5" },
     { name = "pytest", specifier = "==9.0.3" },
     { name = "pytest-cov", specifier = "==7.0.0" },
+    { name = "pytest-github-actions-annotate-failures", specifier = "==0.4.0" },
     { name = "pytest-subtests", specifier = "==0.15.0" },
     { name = "pytest-xdist", specifier = "==3.8.0" },
 ]
