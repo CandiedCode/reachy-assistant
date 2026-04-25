@@ -12,7 +12,7 @@ ci = [
   "bandit==1.9.4",
   "detect-secrets==1.5.0",
   "licensecheck==2025.1.0",
-  "scanoss==1.52.1",
+  "scanoss==1.52.1"
 ]
 lint = [
   "codespell==2.4.2",
@@ -50,6 +50,8 @@ dependencies = [
   "pydantic_settings==2.13.1",
   "reachy-mini[mujoco]==1.7.0",
   "requests==2.33.1",
+  "torch==2.11.0",
+  "torchvision==0.26.0",
   "sqlalchemy==2.0.49",
   "ultralytics==8.4.41"
 ]
@@ -73,3 +75,16 @@ write-to = "reachy_assistant/_version.py"
 write-to-template = "__version__ = {version!r}"
 version-scheme = "guess-next-dev"
 local-scheme = "no-local-version"
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+  {index = "pytorch-cpu"}
+]
+torchvision = [
+  {index = "pytorch-cpu"}
+]
