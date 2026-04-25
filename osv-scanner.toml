@@ -1,0 +1,4 @@
+[[IgnoredVulns]]
+id = "GHSA-58qw-9mgm-455v"
+ignoreUntil = 2026-06-01
+reason = "No fix available"
