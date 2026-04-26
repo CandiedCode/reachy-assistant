@@ -1,71 +1,33 @@
 import threading
 import time
 
-import numpy as np
-from pydantic import BaseModel
 from reachy_mini import ReachyMini, ReachyMiniApp
-from reachy_mini.utils import create_head_pose
 
-from reachy_assistant.services.vision.tracker import FaceTracker
+from reachy_assistant import settings
+from reachy_assistant.services.jobs import Jobs
 
 
 class ReachyAssistant(ReachyMiniApp):
-    custom_app_url = "http://0.0.0.0:7861/"
+    settings = settings.Settings()
+    custom_app_url = settings.custom_app_url
 
     def run(self, reachy_mini: ReachyMini, stop_event: threading.Event):
-        t0 = time.time()
 
-        antennas_enabled = True
-        sound_play_requested = False
+        # Get the configured Jobs and start them
+        jobs = Jobs()
+        jobs.start(stop_event)
 
-        face_tracker = FaceTracker(reachy_mini, model_name="yolo26n.pt")
+        # type narrowing
+        assert self.settings_app is not None, "Settings app is not initialized"
 
-        # You can ignore this part if you don't want to add settings to your app. If you set custom_app_url to None, you have to remove this part as well.
-        # === vvv ===
-        class AntennaState(BaseModel):
-            enabled: bool
-
-        @self.settings_app.post("/antennas")
-        def update_antennas_state(state: AntennaState):
-            nonlocal antennas_enabled
-            antennas_enabled = state.enabled
-            return {"antennas_enabled": antennas_enabled}
-
-        @self.settings_app.post("/play_sound")
-        def request_sound_play():
-            nonlocal sound_play_requested
-            sound_play_requested = True
-
-        # === ^^^ ===
+        # Service status endpoint
+        @self.settings_app.get("/status/services")
+        def get_service_statuses():
+            cron_statuses = [s.as_dict() for s in jobs.statuses]
+            return {"services": cron_statuses}
 
         # Main control loop
         while not stop_event.is_set():
-            t = time.time() - t0
-
-            yaw_deg = 30.0 * np.sin(2.0 * np.pi * 0.2 * t)
-            head_pose = create_head_pose(yaw=yaw_deg, degrees=True)
-
-            if antennas_enabled:
-                amp_deg = 25.0
-                a = amp_deg * np.sin(2.0 * np.pi * 0.5 * t)
-                antennas_deg = np.array([a, -a])
-            else:
-                antennas_deg = np.array([0.0, 0.0])
-
-            if sound_play_requested:
-                print("Playing sound...")
-                reachy_mini.media.play_sound("wake_up.wav")
-                sound_play_requested = False
-
-            antennas_rad = np.deg2rad(antennas_deg)
-
-            reachy_mini.set_target(
-                head=head_pose,
-                antennas=antennas_rad,
-            )
-
-            face_tracker.predict(reachy_mini.media.get_frame())  # Ensure media pipeline is active for face tracking
-
             time.sleep(0.02)
 
 

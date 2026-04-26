@@ -6,5 +6,10 @@ class Settings(pydantic_settings.BaseSettings):
 
     reachy_api_url: str = "http://localhost"
     """Address of the Reachy API. By default, it is set to `http://localhost`."""
-    reachy_api_port: int = 8790
+    reachy_api_port: int = 8791
     """Port of the Reachy API. By default, it is set to `8790`."""
+
+    @property
+    def custom_app_url(self) -> str:
+        """Custom URL for the app. It is constructed from the `reachy_api_url` and `reachy_api_port` settings."""
+        return f"{self.reachy_api_url}:{self.reachy_api_port}/"
