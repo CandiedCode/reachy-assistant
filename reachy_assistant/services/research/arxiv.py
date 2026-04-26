@@ -6,6 +6,7 @@ from typing import Final
 
 import feedparser
 import requests
+from fastapi import APIRouter
 
 from reachy_assistant.services.registry import CronJobEntry, cron_job
 from reachy_assistant.services.scheduler import BaseScheduler
@@ -36,6 +37,13 @@ class ArxivPaper:
 
 class ArxivScheduler(BaseScheduler):
     """Runs the arXiv paper scraper on a daily schedule."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Initialize the scheduler and its state."""
+        super().__init__(*args, **kwargs)
+
+        # Store the latest papers in memory
+        self.latest_papers: list[ArxivPaper] = []
 
     def _run_job(self) -> None:
         """Fetch the latest crypto and security papers from arXiv."""
@@ -90,8 +98,9 @@ class ArxivScheduler(BaseScheduler):
         Args:
             papers: List of ArxivPaper objects to process.
         """
+        self.latest_papers = papers
         for paper in papers:
-            LOGGER.info("Paper: %s (ID: %s)", paper.title, paper.arxiv_id)
+            LOGGER.debug("Paper: %s (ID: %s)", paper.title, paper.arxiv_id)
 
 
 @cron_job(name="arxiv_papers")
@@ -103,7 +112,38 @@ def _register() -> CronJobEntry:
     """
     status = ServiceStatus(name="arxiv_scheduler", enabled=True)
     scheduler = ArxivScheduler(interval_seconds=ONE_DAY_SECONDS, status=status)
-    return CronJobEntry(name="arxiv_papers", scheduler=scheduler, status=status)
+
+    router = APIRouter()
+
+    @router.get("/papers")
+    def get_papers(limit: int = 25):
+        """Return the latest crypto/security papers from arXiv.
+
+        Args:
+            limit: Maximum number of papers to return (default 25).
+
+        Returns:
+            A dictionary with paper count and list of paper objects.
+        """
+        papers = scheduler.latest_papers[:limit]
+        return {
+            "limit": limit,
+            "count": len(papers),
+            "papers": [
+                {
+                    "title": p.title,
+                    "authors": p.authors,
+                    "published": p.published,
+                    "arxiv_id": p.arxiv_id,
+                    "summary": p.summary[:200] + "..." if len(p.summary) > 200 else p.summary,
+                    "link": p.link,
+                    "pdf_link": p.pdf_link,
+                }
+                for p in papers
+            ],
+        }
+
+    return CronJobEntry(name="arxiv_papers", scheduler=scheduler, status=status, router=router)
 
 
 if __name__ == "__main__":

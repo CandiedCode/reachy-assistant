@@ -27,6 +27,7 @@ from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
 import pydantic
+from fastapi import APIRouter
 
 from reachy_assistant.services.status import ServiceStatus
 
@@ -56,6 +57,7 @@ class CronJobEntry:
     scheduler: Startable
     status: ServiceStatus
     config: pydantic.BaseModel | None = None
+    router: APIRouter | None = None
 
 
 # Module-level registry of (name, factory_fn) pairs — populated by @cron_job decorators.
@@ -110,6 +112,13 @@ def build_registry() -> list[CronJobEntry]:
         LOGGER.debug("Building cron job '%s' using factory %s", name, factory_fn)
         entry = factory_fn()
         if entry is not None:
+            if name != entry.status.name:
+                LOGGER.warning(
+                    "Cron job '%s' factory returned entry with mismatched status name '%s'; overriding to match",
+                    name,
+                    entry.status.name,
+                )
+                entry.status.name = name  # Ensure status name matches entry name for consistency
             entries.append(entry)
         else:
             LOGGER.info("Cron job '%s' is disabled by its factory; skipping", name)

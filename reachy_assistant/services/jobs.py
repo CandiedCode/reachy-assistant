@@ -2,6 +2,8 @@
 
 import threading
 
+from fastapi import FastAPI
+
 from reachy_assistant.services.registry import CronJobEntry, Startable, build_registry
 from reachy_assistant.services.status import ServiceStatus
 
@@ -65,3 +67,20 @@ class Jobs:
         for entry in self._entries:
             if hasattr(entry.scheduler, "stop"):
                 entry.scheduler.stop()
+
+    def include_routers(self, app: FastAPI) -> None:
+        """Include each service's optional APIRouter into the given FastAPI app.
+
+        Each router is mounted under /services/<name>/ with a matching tag so
+        routes are grouped in the auto-generated OpenAPI docs.
+
+        Args:
+            app: The FastAPI application (self.settings_app in main.py).
+        """
+        for entry in self._entries:
+            if entry.router is not None:
+                app.include_router(
+                    entry.router,
+                    prefix=f"/services/{entry.name}",
+                    tags=[entry.name],
+                )
