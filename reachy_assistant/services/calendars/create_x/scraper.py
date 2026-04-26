@@ -111,7 +111,7 @@ def _register() -> CronJobEntry | None:
     if not settings.calendar_enabled:
         return None
 
-    status = ServiceStatus(name="calendar_scheduler", enabled=True)
+    status = ServiceStatus(name="creative_x_calendar", enabled=True)
     store = CalendarStore(settings.calendar_db_path)
     scheduler = CalendarScheduler(
         store=store,

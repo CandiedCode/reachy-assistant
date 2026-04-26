@@ -28,6 +28,18 @@ class Jobs:
         """Return ServiceStatus objects for all registered jobs."""
         return [entry.status for entry in self._entries]
 
+    def status(self, service_name: str) -> ServiceStatus | None:
+        """Return the ServiceStatus object for a specific job.
+
+        Args:
+            service_name: The job name as passed to @cron_job(name=...).
+
+        Returns:
+            The ServiceStatus object for the specified job, or None if not found.
+        """
+        entry = next((entry for entry in self._entries if entry.name == service_name), None)
+        return entry.status if entry else None
+
     def get_scheduler(self, name: str) -> Startable | None:
         """Get a specific scheduler by job name.
 

@@ -93,9 +93,7 @@ class Scraper(scraper.Scraper):
         return events
 
     def _extract_records(self, data: list | dict[str, Any]) -> list[dict]:
-        """Extract the record list from the API response.
-
-        Handles various response structures.
+        """Extract the data from the API response.
 
         Args:
             data: Parsed JSON response from the API.
@@ -156,7 +154,7 @@ def _register() -> CronJobEntry | None:
     if not settings.calendar_enabled:
         return None
 
-    status = ServiceStatus(name="calendar_scheduler", enabled=True)
+    status = ServiceStatus(name="gatech_calendar", enabled=True)
     store = CalendarStore(settings.calendar_db_path)
     scheduler = CalendarScheduler(
         store=store,
