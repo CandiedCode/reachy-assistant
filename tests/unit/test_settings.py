@@ -10,6 +10,7 @@ DEFAULTS = {
     "reachy_api_port": 8790,
 }
 
+
 class TestSettingsDefaults:
     """Test default values for Settings."""
 

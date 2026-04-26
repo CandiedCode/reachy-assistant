@@ -3886,7 +3886,7 @@ name = "pygobject"
 version = "3.46.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pycairo", marker = "sys_platform != 'win32'" },
+    { name = "pycairo", marker = "(python_full_version >= '3.15' and sys_platform == 'darwin') or (sys_platform != 'darwin' and sys_platform != 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/ac/4a/f24ddf1d20cc4b56affc7921e29928559a06c922eb60077448392792b914/PyGObject-3.46.0.tar.gz", hash = "sha256:481437b05af0a66b7c366ea052710eb3aacbb979d22d30b797f7ec29347ab1e6", size = 723367, upload-time = "2023-09-10T09:56:26.737Z" }
 
@@ -4226,7 +4226,6 @@ dependencies = [
     { name = "alembic" },
     { name = "beautifulsoup4" },
     { name = "feedparser" },
-    { name = "opencv-python" },
     { name = "playwright" },
     { name = "pydantic-settings" },
     { name = "reachy-mini", extra = ["mujoco"] },
@@ -4294,7 +4293,6 @@ requires-dist = [
     { name = "alembic", specifier = "==1.18.4" },
     { name = "beautifulsoup4", specifier = "==4.14.3" },
     { name = "feedparser", specifier = "==6.0.12" },
-    { name = "opencv-python", specifier = "==4.13.0.92" },
     { name = "playwright", specifier = "==1.58.0" },
     { name = "pydantic-settings", specifier = "==2.13.1" },
     { name = "reachy-mini", extras = ["mujoco"], specifier = "==1.7.0" },

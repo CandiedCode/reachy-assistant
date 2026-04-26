@@ -18,3 +18,7 @@ data/
 
 # Security Reports
 osv-results.json
+
+# models
+yolo26n_ncnn_model/
+yolo26n.pt

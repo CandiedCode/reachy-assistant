@@ -5,22 +5,19 @@ import numpy as np
 from pydantic import BaseModel
 from reachy_mini import ReachyMini, ReachyMiniApp
 from reachy_mini.utils import create_head_pose
+from reachy_assistant.services.vision.tracker import FaceTracker
 
 
 class ReachyAssistant(ReachyMiniApp):
-    # Optional: URL to a custom configuration page for the app
-    # eg. "http://localhost:8042"
-    custom_app_ur = "http://0.0.0.0:7861/"
-    # dont_start_webserver = False
-    # Optional: specify a media backend ("gstreamer", "gstreamer_no_video", "default", etc.)
-    # On the wireless, use gstreamer_no_video to optimise CPU usage if the app does not use video streaming
-    request_media_backend: str | None = "local"
+    custom_app_url = "http://0.0.0.0:7861/"
 
     def run(self, reachy_mini: ReachyMini, stop_event: threading.Event):
         t0 = time.time()
 
         antennas_enabled = True
         sound_play_requested = False
+
+        face_tracker = FaceTracker(reachy_mini, model_name="yolo26n.pt")
 
         # You can ignore this part if you don't want to add settings to your app. If you set custom_app_url to None, you have to remove this part as well.
         # === vvv ===
@@ -66,7 +63,7 @@ class ReachyAssistant(ReachyMiniApp):
                 antennas=antennas_rad,
             )
 
-            reachy_mini.media.get_frame()  # Ensure media pipeline is active for face tracking
+            face_tracker.predict(reachy_mini.media.get_frame())  # Ensure media pipeline is active for face tracking
 
             time.sleep(0.02)
 
