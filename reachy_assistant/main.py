@@ -5,6 +5,7 @@ import numpy as np
 from pydantic import BaseModel
 from reachy_mini import ReachyMini, ReachyMiniApp
 from reachy_mini.utils import create_head_pose
+
 from reachy_assistant.services.vision.tracker import FaceTracker
 
 

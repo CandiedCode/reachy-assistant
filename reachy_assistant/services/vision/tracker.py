@@ -2,14 +2,13 @@
 
 import logging
 import threading
+from pathlib import Path
 
 import numpy as np
+import numpy.typing as npt
 from reachy_mini import ReachyMini
 from reachy_mini.utils import create_head_pose
 from ultralytics import YOLO
-from pathlib import Path
-import numpy as np
-import numpy.typing as npt
 
 LOGGER = logging.getLogger(__name__)
 
@@ -112,9 +111,9 @@ class FaceTracker:
 
     def create_head_pose(self, cx: float, cy: float) -> tuple[float, float]:
         """Create a head pose dict based on face position vis proportional controller."""
-        face_tracking_kp = 15.0 # proportional gain
-        error_u = (cx - self.frame_width / 2) / (self.frame_width / 2) # how far is the face from the center horizontally
-        error_v = (cy - self.frame_height / 2) / (self.frame_height / 2) # how far is the face from the center vertically
+        face_tracking_kp = 15.0  # proportional gain
+        error_u = (cx - self.frame_width / 2) / (self.frame_width / 2)  # how far is the face from the center horizontally
+        error_v = (cy - self.frame_height / 2) / (self.frame_height / 2)  # how far is the face from the center vertically
 
         # dead zone
         if abs(error_u) < 0.05:
@@ -122,8 +121,8 @@ class FaceTracker:
         if abs(error_v) < 0.05:
             error_v = 0
 
-        target_yaw = -face_tracking_kp * error_u # turn in opposite direction of error (negative sign) let and right movement
-        target_pitch = -face_tracking_kp * error_v # turn in opposite direction of error (negative sign) up and down movement
+        target_yaw = -face_tracking_kp * error_u  # turn in opposite direction of error (negative sign) let and right movement
+        target_pitch = -face_tracking_kp * error_v  # turn in opposite direction of error (negative sign) up and down movement
         return target_yaw, target_pitch
 
     def predict(self, frame: npt.NDArray[np.uint8]):
@@ -151,8 +150,6 @@ class FaceTracker:
                 # self.reachy_mini.set_target(head=head_pose)
                 self.reachy_mini.look_at_image(cx, cy, duration=0.3)
 
-
-
     def _run(self, reachy_mini: ReachyMini, stop_event: threading.Event) -> None:
         """Capture frames and run face detection.
 
@@ -171,7 +168,7 @@ class FaceTracker:
             try:
                 # Try to get frame from Reachy camera first
                 frame = reachy_mini.media.get_frame()
-            except Exception: # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except
                 LOGGER.exception("Failed to get frame from Reachy camera")
                 self.max_retries -= 1
                 continue
@@ -183,7 +180,7 @@ class FaceTracker:
 
             try:
                 results = self.model(frame, verbose=False)
-            except Exception as e: # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except
                 LOGGER.exception("Model inference failed")
                 self.max_retries -= 1
                 continue
@@ -238,9 +235,7 @@ class FaceTracker:
                                 best_cy = (y1 + y2) / 2.0
                                 face_detected = True
 
-
             self.move_reachy(face_detected, best_cx, best_cy, self.reachy_mini)
-
 
     def move_reachy(self, face_detected: bool, cx: float, cy: float, reachy_mini: ReachyMini) -> None:
         if face_detected:
