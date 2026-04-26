@@ -77,6 +77,30 @@ class Jobs:
         Args:
             app: The FastAPI application (self.settings_app in main.py).
         """
+       # Service status endpoint
+        @app.get("/status/services")
+        def get_service_statuses():
+            """Return the status of all registered services.
+
+            Returns:
+                A list of service status dictionaries, one for each registered job.
+            """
+            cron_statuses = [s.as_dict() for s in self.statuses]
+            return {"services": cron_statuses}
+
+        @app.get("/status/services/{service_name}")
+        def get_service_status(service_name: str):
+            """Return the status of a specific service by name.
+
+            Args:
+                service_name: The name of the service to query (e.g. "gatech_calendar")
+
+            Returns:
+                A dictionary representing the status of the specified service, or None if not found.
+            """
+            status = self.status(service_name)
+            return {"status": status.as_dict() if status else None}
+
         for entry in self._entries:
             if entry.router is not None:
                 app.include_router(

@@ -13,36 +13,14 @@ class ReachyAssistant(ReachyMiniApp):
 
     def run(self, reachy_mini: ReachyMini, stop_event: threading.Event):
 
-        # Get the configured Jobs and start them
-        jobs = Jobs()
-        jobs.start(stop_event)
-
         # type narrowing
         assert self.settings_app is not None, "Settings app is not initialized"
 
-        # Service status endpoint
-        @self.settings_app.get("/status/services")
-        def get_service_statuses():
-            """Return the status of all registered services.
+        # Get the configured Jobs and start them
+        jobs = Jobs()
+        jobs.start(stop_event)
+        jobs.include_routers(self.settings_app)
 
-            Returns:
-                A list of service status dictionaries, one for each registered job.
-            """
-            cron_statuses = [s.as_dict() for s in jobs.statuses]
-            return {"services": cron_statuses}
-
-        @self.settings_app.get("/status/services/{service_name}")
-        def get_service_status(service_name: str):
-            """Return the status of a specific service by name.
-
-            Args:
-                service_name: The name of the service to query (e.g. "gatech_calendar")
-
-            Returns:
-                A dictionary representing the status of the specified service, or None if not found.
-            """
-            status = jobs.status(service_name)
-            return {"status": status.as_dict() if status else None}
 
         # Main control loop
         while not stop_event.is_set():
