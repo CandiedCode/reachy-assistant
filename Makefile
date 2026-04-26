@@ -10,7 +10,7 @@ reachy/sim: ## Run the Reachy simulator
 
 .PHONY: security/dependency
 security/dependency: ## Check if dependencies contain any vulnerabilities
-	go run github.com/google/osv-scanner/v2/cmd/osv-scanner@latest scan source --lockfile=uv.lock --all-packages --format=vertical
+	go run github.com/google/osv-scanner/v2/cmd/osv-scanner@latest scan source --lockfile=uv.lock --format=vertical --config=osv-scanner.toml
 
 .PHONY: security/sast
 security/sast: ## Run Static Analysis testing

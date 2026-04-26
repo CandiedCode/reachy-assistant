@@ -8,10 +8,7 @@ from reachy_assistant.settings import Settings
 DEFAULTS = {
     "reachy_api_url": "http://localhost",
     "reachy_api_port": 8790,
-    "request_media_backend": "auto",
 }
-
-VALID_MEDIA_BACKENDS = ["no_media", "local", "webrtc", "auto"]
 
 
 class TestSettingsDefaults:
@@ -22,7 +19,6 @@ class TestSettingsDefaults:
         [
             ("reachy_api_url", "http://localhost"),
             ("reachy_api_port", 8790),
-            ("request_media_backend", "auto"),
         ],
     )
     def test_defaults(self, attribute: str, expected_value: str | int) -> None:
@@ -39,8 +35,6 @@ class TestSettingsEnvironmentVariables:
         [
             ("RA_REACHY_API_URL", "http://192.168.1.100", "reachy_api_url", "http://192.168.1.100"),
             ("RA_REACHY_API_PORT", "9000", "reachy_api_port", 9000),
-            ("RA_REQUEST_MEDIA_BACKEND", "webrtc", "request_media_backend", "webrtc"),
-            ("RA_REQUEST_MEDIA_BACKEND", "auto", "request_media_backend", "auto"),
         ],
     )
     def test_load_from_env(
@@ -66,26 +60,6 @@ class TestSettingsValidation:
         with pytest.raises(ValidationError):
             Settings()
 
-    @pytest.mark.parametrize("backend", VALID_MEDIA_BACKENDS)
-    def test_valid_media_backends(
-        self,
-        monkeypatch: pytest.MonkeyPatch,
-        backend: str | None,
-    ) -> None:
-        """Test that valid media backends are accepted."""
-        if backend is None:
-            monkeypatch.delenv("RA_REQUEST_MEDIA_BACKEND", raising=False)
-        else:
-            monkeypatch.setenv("RA_REQUEST_MEDIA_BACKEND", backend)
-        settings = Settings()
-        assert settings.request_media_backend == backend
-
-    def test_invalid_media_backend(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Test that invalid media backends raise validation error."""
-        monkeypatch.setenv("RA_REQUEST_MEDIA_BACKEND", "invalid_backend")
-        with pytest.raises(ValidationError):
-            Settings()
-
 
 class TestSettingsIntegration:
     """Integration tests for Settings with multiple environment variables."""
@@ -94,21 +68,17 @@ class TestSettingsIntegration:
         """Test loading all settings from environment variables."""
         monkeypatch.setenv("RA_REACHY_API_URL", "http://10.0.0.1")
         monkeypatch.setenv("RA_REACHY_API_PORT", "8000")
-        monkeypatch.setenv("RA_REQUEST_MEDIA_BACKEND", "local")
         settings = Settings()
         assert settings.reachy_api_url == "http://10.0.0.1"
         assert settings.reachy_api_port == 8000
-        assert settings.request_media_backend == "local"
 
     def test_partial_env_vars_use_defaults(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that unset environment variables use defaults."""
         monkeypatch.delenv("RA_REACHY_API_URL", raising=False)
         monkeypatch.delenv("RA_REACHY_API_PORT", raising=False)
-        monkeypatch.delenv("RA_REQUEST_MEDIA_BACKEND", raising=False)
         settings = Settings()
         assert settings.reachy_api_url == "http://localhost"
         assert settings.reachy_api_port == 8790
-        assert settings.request_media_backend == "auto"
 
 
 class TestSettingsDirectInstantiation:
@@ -121,12 +91,10 @@ class TestSettingsDirectInstantiation:
                 {
                     "reachy_api_url": "http://custom.local",
                     "reachy_api_port": 5000,
-                    "request_media_backend": "webrtc",
                 },
                 {
                     "reachy_api_url": "http://custom.local",
                     "reachy_api_port": 5000,
-                    "request_media_backend": "webrtc",
                 },
             ),
             (
@@ -134,7 +102,6 @@ class TestSettingsDirectInstantiation:
                 {
                     "reachy_api_url": "http://localhost",
                     "reachy_api_port": 3000,
-                    "request_media_backend": "auto",
                 },
             ),
         ],
