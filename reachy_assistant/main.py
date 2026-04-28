@@ -1,12 +1,20 @@
 """Main entry point for the Reachy Assistant app."""
 
+import logging
 import threading
 import time
 
 from reachy_mini import ReachyMini, ReachyMiniApp
+from reachy_mini.utils import create_head_pose
 
-from reachy_assistant import settings
+from reachy_assistant import settings, tracker
 from reachy_assistant.services.jobs import Jobs
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+LOGGER = logging.getLogger(__name__)
 
 
 class ReachyAssistant(ReachyMiniApp):
@@ -15,7 +23,7 @@ class ReachyAssistant(ReachyMiniApp):
     settings = settings.Settings()
     custom_app_url = settings.custom_app_url
 
-    def run(self, reachy_mini: ReachyMini, stop_event: threading.Event) -> None:  # noqa: ARG002
+    def run(self, reachy_mini: ReachyMini, stop_event: threading.Event) -> None:
         """Run main entry point for the Reachy Assistant app.
 
         Args:
@@ -25,6 +33,7 @@ class ReachyAssistant(ReachyMiniApp):
 
         # type narrowing
         assert self.settings_app is not None, "Settings app is not initialized"
+        face_tracker = tracker.FaceTracker(reachy_mini, model_name="yolov8n-face.pt", confidence_threshold=0.5)
 
         # Get the configured Jobs and start them
         jobs = Jobs()
@@ -33,6 +42,9 @@ class ReachyAssistant(ReachyMiniApp):
 
         # Main control loop
         while not stop_event.is_set():
+            cx, cy = face_tracker.predict(frame=reachy_mini.media.get_frame())
+            head_pose = create_head_pose(cx, cy)
+            reachy_mini.set_target(head=head_pose)
             time.sleep(0.02)
 
 

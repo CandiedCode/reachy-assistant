@@ -17,7 +17,7 @@ def get_calendar_store(db_path: str | Path) -> CalendarStore:
     Returns:
         CalendarStore: The shared store instance.
     """
-    global _calendar_store
+    global _calendar_store  # noqa: PLW0603
     if _calendar_store is None:
         _calendar_store = CalendarStore(Path(db_path) if isinstance(db_path, str) else db_path)
     return _calendar_store

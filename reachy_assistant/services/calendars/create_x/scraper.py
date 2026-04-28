@@ -108,7 +108,7 @@ def _register() -> CronJobEntry | None:
     Returns None if calendar_enabled is False, otherwise returns a
     CronJobEntry with the configured scheduler and status.
     """
-    from reachy_assistant.services.calendars import get_calendar_store
+    from reachy_assistant.services.calendars import get_calendar_store  # noqa: PLC0415
 
     settings = CalendarSchedulerConfig()
     if not settings.calendar_enabled:
