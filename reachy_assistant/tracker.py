@@ -68,8 +68,11 @@ class FaceTracker:
         LOGGER.info("Loading YOLO model: %s", self.model_name)
 
         path = Path("yolo26n_ncnn_model")
+        # If we have already exported the NCNN model use this
         if path.is_dir():
             model = YOLO("yolo26n_ncnn_model", task="detect")
+        # else create it by exporting the format to ncnn
+        # See https://docs.ultralytics.com/guides/raspberry-pi/ for more information
         else:
             model = YOLO(self.model_name, task="detect")
             model.export(format="ncnn")  # creates 'yolo26n_ncnn_model'
@@ -101,12 +104,12 @@ class FaceTracker:
         Returns:
             Tuple of (target_yaw, target_pitch) representing the desired head pose angles.
         """
-        face_tracking_kp = 15.0  # proportional gain
-        error_u = (cx - self.frame_width / 2) / (self.frame_width / 2)  # how far is the face from the center horizontally
-        error_v = (cy - self.frame_height / 2) / (self.frame_height / 2)  # how far is the face from the center vertically
+        face_tracking_kp = 35.0  # proportional gain
+        error_u = (cx - self.frame_width / 2) / (self.frame_width / 2)  # face from the center horizontally
+        error_v = (cy - self.frame_height / 2) / (self.frame_height / 2)  # face from the center vertically
 
-        target_yaw = -face_tracking_kp * error_u  # turn in opposite direction of error (negative sign) let and right movement
-        target_pitch = -face_tracking_kp * error_v  # turn in opposite direction of error (negative sign) up and down movement
+        target_yaw = -face_tracking_kp * error_u  # turn in opposite direction of error, negative sign, let and right movement
+        target_pitch = face_tracking_kp * error_v  # turn in opposite direction of error, negative sign, up and down movement
         return target_yaw, target_pitch
 
     def predict(self, frame: npt.NDArray[np.uint8] | None) -> tuple[float, float]:
@@ -119,32 +122,41 @@ class FaceTracker:
             Tuple of (yaw, pitch) representing the head pose if a face is detected, otherwise None.
         """
         if self.model is None:
+            LOGGER.warning("Model not loaded")
             return 0, 0
 
-        # perform inferencing on image frame
-        results = self.model(frame)
+        if frame is None:
+            LOGGER.warning("No frame provided for prediction")
+            return 0, 0
+
+        # perform inferencing on image frame, scale image size down for an optimization
+        results = self.model(source=frame, imgsz=640)
 
         # iterate over the results per class
         for r in results:
             if r.boxes is None:
+                LOGGER.warning("No boxes in result")
                 continue
 
             # get the class id's
             class_ids = r.boxes.cls.cpu().numpy()
-            # confidences for each detection
-            confidences = r.boxes.conf.cpu().numpy()
             # filter to faces only
             mask = class_ids == self.FACE_CLASS_ID
 
             if not np.any(mask):
+                LOGGER.info("No faces detected in this frame")
                 continue
+
+            # confidences for each detection
+            confidences = r.boxes.conf.cpu().numpy()
 
             # get the id of the face with the highest confidence score
             idx = confidences[mask].argmax()
+            confidence = confidences[mask][idx]
+            LOGGER.debug("Highest face confidence: %f (threshold: %f)", confidence, self.confidence_threshold)
 
             # if the face has met the minimum confidence threshold
-            if confidences[mask][idx] >= self.confidence_threshold:
-                LOGGER.info("Face detected with confidence: %f", confidences[mask][idx])
+            if confidence >= self.confidence_threshold:
                 cx, cy = self.get_center(r.boxes.xyxy.cpu().numpy()[mask][idx])
                 head_pose = self.create_head_pose(cx, cy)
                 return head_pose

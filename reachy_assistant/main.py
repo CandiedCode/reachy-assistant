@@ -8,15 +8,13 @@ from reachy_mini import ReachyMini, ReachyMiniApp
 from reachy_mini.utils import create_head_pose
 
 from reachy_assistant import settings, tracker
-from reachy_assistant.log_config import configure_logging
 from reachy_assistant.services.jobs import Jobs
 
-configure_logging()
 LOGGER = logging.getLogger(__name__)
 
 
 class ReachyAssistant(ReachyMiniApp):
-    """Reachy Personal Asisstant App."""
+    """Reachy Personal Assistant App."""
 
     settings = settings.Settings()
     custom_app_url = settings.custom_app_url
@@ -38,10 +36,20 @@ class ReachyAssistant(ReachyMiniApp):
         jobs.start(stop_event)
         jobs.include_routers(self.settings_app)
 
+        # run face detection every 5th frame (~10 Hz)
+        frame_count = 0
+        last_yaw, last_pitch = 0, 0
+
         # Main control loop
         while not stop_event.is_set():
-            yaw, pitch = face_tracker.predict(frame=reachy_mini.media.get_frame())
-            head_pose = create_head_pose(yaw=yaw, pitch=pitch, degrees=True)
+            frame_count += 1
+            if frame_count % 5 == 0:
+                last_yaw, last_pitch = face_tracker.predict(frame=reachy_mini.media.get_frame())
+                # print("checking for face")
+                # print(last_yaw)
+                # print(last_pitch)
+
+            head_pose = create_head_pose(yaw=last_yaw, pitch=last_pitch, degrees=True)
             reachy_mini.set_target(head=head_pose)
             time.sleep(0.02)
 

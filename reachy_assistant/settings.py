@@ -12,6 +12,10 @@ class Settings(pydantic_settings.BaseSettings):
     """Address of the Reachy API. By default, it is set to `http://localhost`."""
     reachy_api_port: int = 8790
     """Port of the Reachy API. By default, it is set to `8790`."""
+    face_tracking_enabled: bool = True
+    """Whether to enable face tracking. Enabled by default."""
+    antenna_enabled: bool = True
+    """Whether to enable the antenna. Enabled by default."""
 
     @property
     def custom_app_url(self) -> str:
