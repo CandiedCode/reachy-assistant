@@ -18,8 +18,8 @@ exclude = [
     "dist",
     "*.egg-info",
     "venv",
+    "alembic",
     "reachy_assistant/services/calendars/hive/scraper.py",
-    "reachy_assistant/test.py",
 ]
 
 [format]

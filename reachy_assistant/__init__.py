@@ -1,0 +1,1 @@
+"""Reachy Assistant package."""

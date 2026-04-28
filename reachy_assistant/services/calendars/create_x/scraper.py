@@ -1,3 +1,5 @@
+"""Scraper for Create-X upcoming events calendar."""
+
 import datetime
 import logging
 from typing import Final
@@ -120,10 +122,3 @@ def _register() -> CronJobEntry | None:
         status=status,
     )
     return CronJobEntry(name="creative_x_calendar", scheduler=scheduler, status=status, config=settings)
-
-
-if __name__ == "__main__":
-    scraper = Scraper()
-    creative_x_events = scraper.scrape_calendar()
-    for event in creative_x_events:
-        print(f"{event.parsed_dates[0]} | {event.event} | {event.link}")  # type: ignore
