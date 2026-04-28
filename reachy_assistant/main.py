@@ -9,6 +9,7 @@ from reachy_mini.utils import create_head_pose
 
 from reachy_assistant import settings, tracker
 from reachy_assistant.services.jobs import Jobs
+from reachy_assistant.services.telegram.service import TelegramService
 
 LOGGER = logging.getLogger(__name__)
 
@@ -40,6 +41,9 @@ class ReachyAssistant(ReachyMiniApp):
         jobs = Jobs()
         jobs.start(stop_event)
         jobs.include_routers(self.settings_app)
+
+        telegram = TelegramService(jobs)
+        telegram.start(stop_event)
 
         # run face detection every 5th frame (~10 Hz)
         frame_count = 0
