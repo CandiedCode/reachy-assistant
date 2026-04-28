@@ -4,6 +4,7 @@ import threading
 
 from fastapi import FastAPI
 
+from reachy_assistant.services.calendars.api import build_router as build_calendar_router
 from reachy_assistant.services.registry import CronJobEntry, Startable, build_registry
 from reachy_assistant.services.status import ServiceStatus
 
@@ -109,3 +110,10 @@ class Jobs:
                     prefix=f"/services/{entry.name}",
                     tags=[entry.name],
                 )
+
+        router = build_calendar_router(db_path="data/reachy_assistant.db")
+        app.include_router(
+            router,
+            prefix="/events",
+            tags=["events"],
+        )

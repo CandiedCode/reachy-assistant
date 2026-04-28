@@ -1,7 +1,7 @@
 """Read/write calendar events to SQLite with Alembic migrations."""
 
 import logging
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from alembic.config import Config
@@ -117,3 +117,35 @@ class CalendarStore:
                 return result.scalar() or 0
         except Exception:  # noqa: BLE001 pylint: disable=broad-exception-caught
             return 0
+
+    def get_events_in_next_days(self, days: int) -> list[CalendarEvent]:
+        """Get calendar events within the next N days.
+
+        Args:
+            days: Number of days to look ahead (must be >= 1).
+
+        Returns:
+            List of CalendarEvent objects with start_date within [now, now+days],
+            sorted by start_date.
+        """
+        if days < 1:
+            return []
+
+        now = datetime.now(UTC)
+        cutoff = now + timedelta(days=days)
+
+        try:
+            with self._engine.connect() as conn:
+                query = text(
+                    """
+                    SELECT id, date, semester, year, category, event, start_date, end_date, link
+                    FROM calendar_events
+                    WHERE start_date >= :now OR end_date <= :cutoff
+                    ORDER BY start_date ASC
+                    """
+                )
+                rows = conn.execute(query, {"now": now.isoformat(), "cutoff": cutoff.isoformat()}).mappings().all()
+            return [CalendarEvent.model_validate(dict(row)) for row in rows]
+        except Exception as e:  # noqa: BLE001 pylint: disable=broad-exception-caught
+            LOGGER.warning("Failed to query events in next %d days: %s", days, e, exc_info=True)
+            return []
