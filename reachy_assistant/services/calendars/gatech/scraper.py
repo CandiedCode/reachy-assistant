@@ -9,7 +9,6 @@ import requests
 from reachy_assistant.services.calendars import scraper
 from reachy_assistant.services.calendars.gatech.event import CalendarEvent
 from reachy_assistant.services.calendars.scheduler import CalendarScheduler, CalendarSchedulerConfig
-from reachy_assistant.services.calendars.store import CalendarStore
 from reachy_assistant.services.registry import CronJobEntry, cron_job
 from reachy_assistant.services.status import ServiceStatus
 
@@ -150,12 +149,14 @@ def _register() -> CronJobEntry | None:
     Returns None if calendar_enabled is False, otherwise returns a
     CronJobEntry with the configured scheduler and status.
     """
+    from reachy_assistant.services.calendars import get_calendar_store
+
     settings = CalendarSchedulerConfig()
     if not settings.calendar_enabled:
         return None
 
     status = ServiceStatus(name="gatech_calendar", enabled=True)
-    store = CalendarStore(settings.calendar_db_path)
+    store = get_calendar_store(settings.calendar_db_path)
     scheduler = CalendarScheduler(
         store=store,
         scraper=Scraper(settings.calendar_excluded_categories),
