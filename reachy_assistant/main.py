@@ -40,8 +40,8 @@ class ReachyAssistant(ReachyMiniApp):
 
         # Main control loop
         while not stop_event.is_set():
-            cx, cy = face_tracker.predict(frame=reachy_mini.media.get_frame())
-            head_pose = create_head_pose(cx, cy)
+            yaw, pitch = face_tracker.predict(frame=reachy_mini.media.get_frame())
+            head_pose = create_head_pose(yaw=yaw, pitch=pitch, degrees=True)
             reachy_mini.set_target(head=head_pose)
             time.sleep(0.02)
 
