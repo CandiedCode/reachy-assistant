@@ -2,7 +2,7 @@
 
 import logging
 from dataclasses import dataclass
-from typing import Final
+from typing import Any, Final
 
 import feedparser
 import requests
@@ -38,7 +38,7 @@ class ArxivPaper:
 class ArxivScheduler(BaseScheduler):
     """Runs the arXiv paper scraper on a daily schedule."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the scheduler and its state."""
         super().__init__(*args, **kwargs)
 
@@ -116,7 +116,7 @@ def _register() -> CronJobEntry:
     router = APIRouter()
 
     @router.get("/papers")
-    def get_papers(limit: int = 25):
+    def get_papers(limit: int = 25):  # noqa: ANN202
         """Return the latest crypto/security papers from arXiv.
 
         Args:
@@ -135,7 +135,7 @@ def _register() -> CronJobEntry:
                     "authors": p.authors,
                     "published": p.published,
                     "arxiv_id": p.arxiv_id,
-                    "summary": p.summary[:200] + "..." if len(p.summary) > 200 else p.summary,
+                    "summary": p.summary,
                     "link": p.link,
                     "pdf_link": p.pdf_link,
                 }

@@ -21,7 +21,6 @@ class ReachyAssistant(ReachyMiniApp):
         jobs.start(stop_event)
         jobs.include_routers(self.settings_app)
 
-
         # Main control loop
         while not stop_event.is_set():
             time.sleep(0.02)

@@ -1,7 +1,11 @@
+"""Settings for the Reachy Assistant."""
+
 import pydantic_settings
 
 
 class Settings(pydantic_settings.BaseSettings):
+    """Settings for the Reachy Assistant."""
+
     model_config = pydantic_settings.SettingsConfigDict(env_prefix="RA_")
 
     reachy_api_url: str = "http://localhost"

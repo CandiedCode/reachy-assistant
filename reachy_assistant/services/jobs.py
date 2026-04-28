@@ -77,9 +77,10 @@ class Jobs:
         Args:
             app: The FastAPI application (self.settings_app in main.py).
         """
-       # Service status endpoint
+
+        # Service status endpoint
         @app.get("/status/services")
-        def get_service_statuses():
+        def get_service_statuses() -> dict[str, list[dict]]:
             """Return the status of all registered services.
 
             Returns:
@@ -89,7 +90,7 @@ class Jobs:
             return {"services": cron_statuses}
 
         @app.get("/status/services/{service_name}")
-        def get_service_status(service_name: str):
+        def get_service_status(service_name: str) -> dict[str, dict | None]:
             """Return the status of a specific service by name.
 
             Args:
