@@ -4,6 +4,7 @@ import threading
 import time
 from unittest.mock import MagicMock, patch
 
+import numpy as np
 import pytest
 from fastapi import FastAPI
 from reachy_mini import ReachyMini
@@ -25,12 +26,16 @@ def stop_event() -> threading.Event:
 
 @pytest.fixture
 def mock_reachy_mini() -> MagicMock:
-    """Create a mock ReachyMini instance.
+    """Create a mock ReachyMini instance with proper frame mock.
 
     Returns:
-        MagicMock: A mocked ReachyMini instance.
+        MagicMock: A mocked ReachyMini instance with frame support.
     """
-    return MagicMock(spec=ReachyMini)
+    mock = MagicMock(spec=ReachyMini)
+    # Mock a typical video frame (height=480, width=640, channels=3)
+    mock_frame = np.zeros((480, 640, 3), dtype=np.uint8)
+    mock.media.get_frame.return_value = mock_frame
+    return mock
 
 
 @pytest.fixture
@@ -79,6 +84,7 @@ class TestReachyAssistantBasics:
             None
         """
         app = ReachyAssistant()
+        assert app.custom_app_url is not None
         assert app.custom_app_url.startswith("http://")
         assert app.custom_app_url.endswith("/")
 
@@ -86,17 +92,24 @@ class TestReachyAssistantBasics:
 class TestReachyAssistantRun:
     """Test ReachyAssistant.run method."""
 
+    @patch("reachy_assistant.main.tracker.FaceTracker")
     @patch("reachy_assistant.main.Jobs")
-    def test_run_creates_jobs_instance(self, mock_jobs_class: MagicMock, mock_reachy_mini: MagicMock, stop_event: threading.Event) -> None:
+    def test_run_creates_jobs_instance(
+        self, mock_jobs_class: MagicMock, mock_face_tracker_class: MagicMock, mock_reachy_mini: MagicMock, stop_event: threading.Event
+    ) -> None:
         """Verify run() creates a Jobs instance.
 
         Args:
             mock_jobs_class: Mocked Jobs class.
+            mock_face_tracker_class: Mocked FaceTracker class.
             mock_reachy_mini: Mocked ReachyMini instance.
             stop_event: threading.Event for stopping the app.
         """
         mock_jobs = MagicMock(spec=Jobs)
         mock_jobs_class.return_value = mock_jobs
+        mock_face_tracker = MagicMock()
+        mock_face_tracker.predict.return_value = (0.0, 0.0)
+        mock_face_tracker_class.return_value = mock_face_tracker
 
         app = ReachyAssistant()
         app.settings_app = MagicMock(spec=FastAPI)
@@ -106,17 +119,24 @@ class TestReachyAssistantRun:
 
         mock_jobs_class.assert_called_once()
 
+    @patch("reachy_assistant.main.tracker.FaceTracker")
     @patch("reachy_assistant.main.Jobs")
-    def test_run_starts_jobs(self, mock_jobs_class: MagicMock, mock_reachy_mini: MagicMock, stop_event: threading.Event) -> None:
+    def test_run_starts_jobs(
+        self, mock_jobs_class: MagicMock, mock_face_tracker_class: MagicMock, mock_reachy_mini: MagicMock, stop_event: threading.Event
+    ) -> None:
         """Verify run() calls jobs.start().
 
         Args:
             mock_jobs_class: Mocked Jobs class.
+            mock_face_tracker_class: Mocked FaceTracker class.
             mock_reachy_mini: Mocked ReachyMini instance.
             stop_event: threading.Event for stopping the app.
         """
         mock_jobs = MagicMock(spec=Jobs)
         mock_jobs_class.return_value = mock_jobs
+        mock_face_tracker = MagicMock()
+        mock_face_tracker.predict.return_value = (0.0, 0.0)
+        mock_face_tracker_class.return_value = mock_face_tracker
 
         app = ReachyAssistant()
         app.settings_app = MagicMock(spec=FastAPI)
@@ -126,17 +146,24 @@ class TestReachyAssistantRun:
 
         mock_jobs.start.assert_called_once_with(stop_event)
 
+    @patch("reachy_assistant.main.tracker.FaceTracker")
     @patch("reachy_assistant.main.Jobs")
-    def test_run_includes_routers(self, mock_jobs_class: MagicMock, mock_reachy_mini: MagicMock, stop_event: threading.Event) -> None:
+    def test_run_includes_routers(
+        self, mock_jobs_class: MagicMock, mock_face_tracker_class: MagicMock, mock_reachy_mini: MagicMock, stop_event: threading.Event
+    ) -> None:
         """Verify run() calls jobs.include_routers().
 
         Args:
             mock_jobs_class: Mocked Jobs class.
+            mock_face_tracker_class: Mocked FaceTracker class.
             mock_reachy_mini: Mocked ReachyMini instance.
             stop_event: threading.Event for stopping the app.
         """
         mock_jobs = MagicMock(spec=Jobs)
         mock_jobs_class.return_value = mock_jobs
+        mock_face_tracker = MagicMock()
+        mock_face_tracker.predict.return_value = (0.0, 0.0)
+        mock_face_tracker_class.return_value = mock_face_tracker
 
         app = ReachyAssistant()
         mock_settings_app = MagicMock(spec=FastAPI)
@@ -147,12 +174,14 @@ class TestReachyAssistantRun:
 
         mock_jobs.include_routers.assert_called_once_with(mock_settings_app)
 
+    @patch("reachy_assistant.main.tracker.FaceTracker")
     @patch("reachy_assistant.main.Jobs")
     def test_run_checks_settings_app_is_not_none(self, mock_reachy_mini: MagicMock, stop_event: threading.Event) -> None:
         """Verify run() asserts settings_app is not None.
 
         Args:
             mock_jobs_class: Mocked Jobs class.
+            mock_face_tracker_class: Mocked FaceTracker class.
             mock_reachy_mini: Mocked ReachyMini instance.
             stop_event: threading.Event for stopping the app.
         """
@@ -163,19 +192,24 @@ class TestReachyAssistantRun:
         with pytest.raises(AssertionError, match="Settings app is not initialized"):
             app.run(mock_reachy_mini, stop_event)
 
+    @patch("reachy_assistant.main.tracker.FaceTracker")
     @patch("reachy_assistant.main.Jobs")
     def test_run_loops_until_stop_event_set(
-        self, mock_jobs_class: MagicMock, mock_reachy_mini: MagicMock, stop_event: threading.Event
+        self, mock_jobs_class: MagicMock, mock_face_tracker_class: MagicMock, mock_reachy_mini: MagicMock, stop_event: threading.Event
     ) -> None:
         """Verify run() loops until stop_event is set.
 
         Args:
             mock_jobs_class: Mocked Jobs class.
+            mock_face_tracker_class: Mocked FaceTracker class.
             mock_reachy_mini: Mocked ReachyMini instance.
             stop_event: threading.Event for stopping the app.
         """
         mock_jobs = MagicMock(spec=Jobs)
         mock_jobs_class.return_value = mock_jobs
+        mock_face_tracker = MagicMock()
+        mock_face_tracker.predict.return_value = (0.0, 0.0)  # Return (cx, cy) tuple
+        mock_face_tracker_class.return_value = mock_face_tracker
 
         app = ReachyAssistant()
         app.settings_app = MagicMock(spec=FastAPI)
