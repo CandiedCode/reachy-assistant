@@ -2,7 +2,7 @@
 
 import datetime
 import re
-from typing import Self
+from typing import Final, Self
 
 import pydantic
 
@@ -13,6 +13,7 @@ class CalendarEvent(event.CalendarEvent):
     """A calendar event from the GaTech academic calendar."""
 
     _DAY_OF_WEEK = re.compile(r"\s*\([A-Za-z]+\)")
+    _DATE_PARTS_COUNT: Final[int] = 2
 
     def _parse_date(self, raw_date: str, year: int) -> datetime.datetime:
         """Parse a date string with day-of-week suffix.
@@ -42,7 +43,7 @@ class CalendarEvent(event.CalendarEvent):
         """
         parts = [p.strip() for p in self.date.split(" - ", 1)]
         start_date = self._parse_date(parts[0], self.year)
-        end_date = self._parse_date(parts[1], self.year) if len(parts) == 2 else start_date
+        end_date = self._parse_date(parts[1], self.year) if len(parts) == self._DATE_PARTS_COUNT else start_date
         return start_date, end_date
 
     @pydantic.model_validator(mode="after")

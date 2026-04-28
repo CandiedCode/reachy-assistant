@@ -1,70 +1,58 @@
+"""Main entry point for the Reachy Assistant app."""
+
+import logging
 import threading
 import time
 
-import numpy as np
-from pydantic import BaseModel
 from reachy_mini import ReachyMini, ReachyMiniApp
 from reachy_mini.utils import create_head_pose
 
-from reachy_assistant.services.vision.tracker import FaceTracker
+from reachy_assistant import settings, tracker
+from reachy_assistant.services.jobs import Jobs
+
+LOGGER = logging.getLogger(__name__)
 
 
 class ReachyAssistant(ReachyMiniApp):
-    custom_app_url = "http://0.0.0.0:7861/"
+    """Reachy Personal Assistant App."""
 
-    def run(self, reachy_mini: ReachyMini, stop_event: threading.Event):
-        t0 = time.time()
+    settings = settings.Settings()
+    custom_app_url = settings.custom_app_url
 
-        antennas_enabled = True
-        sound_play_requested = False
+    def run(self, reachy_mini: ReachyMini, stop_event: threading.Event) -> None:
+        """Run main entry point for the Reachy Assistant app.
 
-        face_tracker = FaceTracker(reachy_mini, model_name="yolo26n.pt")
+        Args:
+            reachy_mini: The ReachyMini instance provided by the framework.
+            stop_event: A threading.Event that will be set when the app should stop.
+        """
 
-        # You can ignore this part if you don't want to add settings to your app. If you set custom_app_url to None, you have to remove this part as well.
-        # === vvv ===
-        class AntennaState(BaseModel):
-            enabled: bool
+        # type narrowing
+        assert self.settings_app is not None, "Settings app is not initialized"
 
-        @self.settings_app.post("/antennas")
-        def update_antennas_state(state: AntennaState):
-            nonlocal antennas_enabled
-            antennas_enabled = state.enabled
-            return {"antennas_enabled": antennas_enabled}
+        face_tracker = (
+            tracker.FaceTracker(reachy_mini, model_name="yolov8n-face.pt", confidence_threshold=0.5)
+            if self.settings.face_tracking_enabled
+            else None
+        )
 
-        @self.settings_app.post("/play_sound")
-        def request_sound_play():
-            nonlocal sound_play_requested
-            sound_play_requested = True
+        # Get the configured Jobs and start them
+        jobs = Jobs()
+        jobs.start(stop_event)
+        jobs.include_routers(self.settings_app)
 
-        # === ^^^ ===
+        # run face detection every 5th frame (~10 Hz)
+        frame_count = 0
+        last_yaw, last_pitch = 0, 0
 
         # Main control loop
         while not stop_event.is_set():
-            t = time.time() - t0
+            frame_count += 1
+            if frame_count % 5 == 0 and face_tracker is not None:
+                last_yaw, last_pitch = face_tracker.predict(frame=reachy_mini.media.get_frame())
+                head_pose = create_head_pose(yaw=last_yaw, pitch=last_pitch, degrees=True)
 
-            yaw_deg = 30.0 * np.sin(2.0 * np.pi * 0.2 * t)
-            head_pose = create_head_pose(yaw=yaw_deg, degrees=True)
-
-            if antennas_enabled:
-                amp_deg = 25.0
-                a = amp_deg * np.sin(2.0 * np.pi * 0.5 * t)
-                antennas_deg = np.array([a, -a])
-            else:
-                antennas_deg = np.array([0.0, 0.0])
-
-            if sound_play_requested:
-                print("Playing sound...")
-                reachy_mini.media.play_sound("wake_up.wav")
-                sound_play_requested = False
-
-            antennas_rad = np.deg2rad(antennas_deg)
-
-            reachy_mini.set_target(
-                head=head_pose,
-                antennas=antennas_rad,
-            )
-
-            face_tracker.predict(reachy_mini.media.get_frame())  # Ensure media pipeline is active for face tracking
+                reachy_mini.set_target(head=head_pose)
 
             time.sleep(0.02)
 

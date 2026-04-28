@@ -20,7 +20,7 @@ class CalendarEvent(pydantic.BaseModel):
     """Event category (e.g., "Classes", "Holiday", "Registration")."""
     event: str
     """Event description (HTML-stripped text)."""
-    link: str | None
+    link: str | None = None
     """URL link to the event page."""
     start_date: datetime.datetime | None = None
     """Parsed start date (UTC)."""

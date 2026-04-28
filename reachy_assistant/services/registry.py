@@ -27,6 +27,7 @@ from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
 import pydantic
+from fastapi import APIRouter
 
 from reachy_assistant.services.status import ServiceStatus
 
@@ -56,6 +57,7 @@ class CronJobEntry:
     scheduler: Startable
     status: ServiceStatus
     config: pydantic.BaseModel | None = None
+    router: APIRouter | None = None
 
 
 # Module-level registry of (name, factory_fn) pairs — populated by @cron_job decorators.
@@ -110,48 +112,14 @@ def build_registry() -> list[CronJobEntry]:
         LOGGER.debug("Building cron job '%s' using factory %s", name, factory_fn)
         entry = factory_fn()
         if entry is not None:
+            if name != entry.status.name:
+                LOGGER.warning(
+                    "Cron job '%s' factory returned entry with mismatched status name '%s'; overriding to match",
+                    name,
+                    entry.status.name,
+                )
+                entry.status.name = name  # Ensure status name matches entry name for consistency
             entries.append(entry)
         else:
             LOGGER.info("Cron job '%s' is disabled by its factory; skipping", name)
     return entries
-
-
-def list_cron_jobs_info() -> None:
-    """Instantiate all registered factories.
-
-    Called once by Jobs.__init__. Each factory is called in order; disabled
-    jobs (returning None) are skipped.
-
-    Returns:
-        List of CronJobEntry for all enabled jobs.
-    """
-    for name, factory_fn in _FACTORY_REGISTRY:
-        entry = factory_fn()
-        if entry is not None:
-            print(f"Cron job '{name}': enabled with scheduler {entry.scheduler} and status {entry.status}")
-            print_expected_env_vars(entry.config.__class__) if entry.config else None
-
-
-def print_expected_env_vars(settings: type[pydantic.BaseModel]) -> None:
-    """Print expected environment variable names based on the provided settings model.
-
-    Args:
-        settings: A Pydantic settings model class.
-    """
-    config = settings.model_config
-    prefix = config.get("env_prefix", "") or ""
-
-    for name, field in settings.model_fields.items():
-        env_names = []
-
-        # Pydantic sometimes stores env overrides here
-        if isinstance(field.json_schema_extra, dict) and "env_names" in field.json_schema_extra:
-            env_names = field.json_schema_extra["env_names"]
-        elif field.alias:
-            env_names = [field.alias]
-        else:
-            env_names = [name]
-
-        if isinstance(env_names, (list, dict)):
-            for env in env_names:
-                print(f"{prefix}{env}".upper())

@@ -130,6 +130,8 @@ def _register() -> CronJobEntry | None:
 
 This then allows [jobs.py](../reachy_assistant/services/jobs.py) to manage the lifecycle of all cron jobs, including starting, stopping, and monitoring their status.
 
+command pattern
+
 ## Available Cron Jobs
 
 ### Calendar Scrapers

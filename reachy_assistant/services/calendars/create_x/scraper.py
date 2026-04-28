@@ -1,3 +1,5 @@
+"""Scraper for Create-X upcoming events calendar."""
+
 import datetime
 import logging
 from typing import Final
@@ -9,7 +11,6 @@ from bs4 import BeautifulSoup
 from reachy_assistant.services.calendars import scraper
 from reachy_assistant.services.calendars.event import CalendarEvent
 from reachy_assistant.services.calendars.scheduler import CalendarScheduler, CalendarSchedulerConfig
-from reachy_assistant.services.calendars.store import CalendarStore
 from reachy_assistant.services.registry import CronJobEntry, cron_job
 from reachy_assistant.services.status import ServiceStatus
 
@@ -107,12 +108,14 @@ def _register() -> CronJobEntry | None:
     Returns None if calendar_enabled is False, otherwise returns a
     CronJobEntry with the configured scheduler and status.
     """
+    from reachy_assistant.services.calendars import get_calendar_store  # noqa: PLC0415
+
     settings = CalendarSchedulerConfig()
     if not settings.calendar_enabled:
         return None
 
-    status = ServiceStatus(name="calendar_scheduler", enabled=True)
-    store = CalendarStore(settings.calendar_db_path)
+    status = ServiceStatus(name="creative_x_calendar", enabled=True)
+    store = get_calendar_store(settings.calendar_db_path)
     scheduler = CalendarScheduler(
         store=store,
         scraper=Scraper(),
@@ -120,10 +123,3 @@ def _register() -> CronJobEntry | None:
         status=status,
     )
     return CronJobEntry(name="creative_x_calendar", scheduler=scheduler, status=status, config=settings)
-
-
-if __name__ == "__main__":
-    scraper = Scraper()
-    creative_x_events = scraper.scrape_calendar()
-    for event in creative_x_events:
-        print(f"{event.parsed_dates[0]} | {event.event} | {event.link}")  # type: ignore

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Scrape the current month and next month from an Outlook published HTML calendar.
 
 Install:
@@ -19,7 +18,9 @@ from playwright.sync_api import Page, sync_playwright
 from reachy_assistant.services.calendars import scraper
 from reachy_assistant.services.calendars.event import CalendarEvent
 
-CALENDAR_URL: Final[str] = "https://outlook.cloud.microsoft/calendar/published/ba5da3d6d9f74a1eb6e3955cd10c2186@ece.gatech.edu/8aa6352871ff4e648ada00d1a273797312192055347853153433/calendar.html"
+CALENDAR_URL: Final[str] = (
+    "https://outlook.cloud.microsoft/calendar/published/ba5da3d6d9f74a1eb6e3955cd10c2186@ece.gatech.edu/8aa6352871ff4e648ada00d1a273797312192055347853153433/calendar.html"
+)
 
 
 class Scraper(scraper.Scraper):
