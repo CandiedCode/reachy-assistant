@@ -29,7 +29,12 @@ class ReachyAssistant(ReachyMiniApp):
 
         # type narrowing
         assert self.settings_app is not None, "Settings app is not initialized"
-        face_tracker = tracker.FaceTracker(reachy_mini, model_name="yolov8n-face.pt", confidence_threshold=0.5)
+
+        face_tracker = (
+            tracker.FaceTracker(reachy_mini, model_name="yolov8n-face.pt", confidence_threshold=0.5)
+            if self.settings.face_tracking_enabled
+            else None
+        )
 
         # Get the configured Jobs and start them
         jobs = Jobs()
@@ -43,14 +48,12 @@ class ReachyAssistant(ReachyMiniApp):
         # Main control loop
         while not stop_event.is_set():
             frame_count += 1
-            if frame_count % 5 == 0:
+            if frame_count % 5 == 0 and face_tracker is not None:
                 last_yaw, last_pitch = face_tracker.predict(frame=reachy_mini.media.get_frame())
-                # print("checking for face")
-                # print(last_yaw)
-                # print(last_pitch)
+                head_pose = create_head_pose(yaw=last_yaw, pitch=last_pitch, degrees=True)
 
-            head_pose = create_head_pose(yaw=last_yaw, pitch=last_pitch, degrees=True)
-            reachy_mini.set_target(head=head_pose)
+                reachy_mini.set_target(head=head_pose)
+
             time.sleep(0.02)
 
 
