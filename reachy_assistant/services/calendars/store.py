@@ -119,14 +119,17 @@ class CalendarStore:
             return 0
 
     def get_events_in_next_days(self, days: int) -> list[CalendarEvent]:
-        """Get calendar events within the next N days.
+        """Get calendar events that start or end within the next N days.
+
+        Captures:
+        - Events starting within [now, now+days]
+        - Events already in progress that end within [now, now+days]
 
         Args:
             days: Number of days to look ahead (must be >= 1).
 
         Returns:
-            List of CalendarEvent objects with start_date within [now, now+days],
-            sorted by start_date.
+            List of CalendarEvent objects sorted by start_date.
         """
         if days < 1:
             return []
@@ -140,7 +143,8 @@ class CalendarStore:
                     """
                     SELECT id, date, semester, year, category, event, start_date, end_date, link
                     FROM calendar_events
-                    WHERE start_date >= :now OR end_date <= :cutoff
+                    WHERE (start_date >= :now AND start_date <= :cutoff)
+                       OR (end_date >= :now AND end_date <= :cutoff)
                     ORDER BY start_date ASC
                     """
                 )
