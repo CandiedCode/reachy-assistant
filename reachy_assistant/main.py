@@ -8,12 +8,10 @@ from reachy_mini import ReachyMini, ReachyMiniApp
 from reachy_mini.utils import create_head_pose
 
 from reachy_assistant import settings, tracker
+from reachy_assistant.log_config import configure_logging
 from reachy_assistant.services.jobs import Jobs
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
+configure_logging()
 LOGGER = logging.getLogger(__name__)
 
 
