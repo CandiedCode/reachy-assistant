@@ -1,3 +1,12 @@
+# [1.4.0](https://github.com/CandiedCode/reachy-assistant/compare/v1.3.1...v1.4.0) (2026-04-28)
+
+
+### Features
+
+* allow custom routes per service ([ea5777f](https://github.com/CandiedCode/reachy-assistant/commit/ea5777fe86d0c6e02a1976dc9a4e8ead2db5a4b1))
+* allow enabling and disabling of face tracking ([cdfafdf](https://github.com/CandiedCode/reachy-assistant/commit/cdfafdf7e4ac38202de6d229175f2e74c9e88190))
+* update head movement ([f1081d9](https://github.com/CandiedCode/reachy-assistant/commit/f1081d99722eb7318800ac8eb0c55c309b12078f))
+
 ## [1.3.1](https://github.com/CandiedCode/reachy-assistant/compare/v1.3.0...v1.3.1) (2026-04-26)
 
 
