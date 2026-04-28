@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Scrape the current month and next month from an Outlook published HTML calendar.
 
 Install:
