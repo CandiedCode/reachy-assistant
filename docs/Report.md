@@ -1,5 +1,7 @@
 # Reachy Mini Personal Assistant
 
+Video Demo can be found [here](https://www.youtube.com/watch?v=ucMSHPNyIg4).
+
 ## Project Overview
 
 The goal of this project was to create a personal assistant using the Reachy Mini robot. The assistant is designed to interact with users through voice commands and provide various services, such as answering questions, controlling smart home devices, and providing information.
